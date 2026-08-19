@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prism Data Flow Examples</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f8f9fa;
+            padding: 40px 20px;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 50px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            color: #1a1a1a;
+            margin-bottom: 12px;
+            font-size: 32px;
+            font-weight: 600;
+        }
+
+        .subtitle {
+            color: #666;
+            margin-bottom: 50px;
+            font-size: 16px;
+        }
+
+        .example {
+            margin-bottom: 50px;
+            padding: 40px;
+            background: #f9fafb;
+            border-radius: 8px;
+            border-left: 4px solid #4f46e5;
+        }
+
+        .example-title {
+            color: #1a1a1a;
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 30px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .example-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 36px;
+            height: 36px;
+            background: #4f46e5;
+            color: white;
+            border-radius: 50%;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        .flow-stage {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .stage-label {
+            display: inline-block;
+            background: #4f46e5;
+            color: white;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .stage-title {
+            color: #1a1a1a;
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .stage-content {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .code-block {
+            background: #f0f4f8;
+            border-left: 3px solid #4f46e5;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            overflow-x: auto;
+            color: #333;
+        }
+
+        .arrow {
+            text-align: center;
+            color: #94a3b8;
+            font-size: 24px;
+            margin: 15px 0;
+            font-weight: 300;
+        }
+
+        .outcome-box {
+            background: #f0fdf4;
+            border: 1px solid #86efac;
+            border-left: 4px solid #22c55e;
+            padding: 20px;
+            border-radius: 6px;
+            margin-top: 20px;
+        }
+
+        .outcome-title {
+            color: #15803d;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .outcome-content {
+            color: #166534;
+            font-size: 14px;
+        }
+
+        .summary {
+            background: #ede9fe;
+            border: 1px solid #d8b4fe;
+            border-left: 4px solid #a855f7;
+            padding: 20px;
+            border-radius: 6px;
+            margin-top: 15px;
+        }
+
+        .summary-title {
+            color: #6b21a8;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .summary-content {
+            color: #7e22ce;
+            font-size: 14px;
+        }
+
+        .key-transformation {
+            background: #fef3c7;
+            border-left: 4px solid #f59e0b;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 15px 0;
+            font-size: 14px;
+            color: #92400e;
+        }
+
+        .highlight {
+            background: #fef08a;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+
+        .section-divider {
+            border-top: 2px solid #e5e7eb;
+            margin: 60px 0;
+            padding-top: 40px;
+        }
+
+        .insights {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-left: 4px solid #0284c7;
+            padding: 25px;
+            border-radius: 6px;
+            margin-top: 50px;
+        }
+
+        .insights-title {
+            color: #0c4a6e;
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 15px;
+        }
+
+        .insights-list {
+            color: #075985;
+            font-size: 14px;
+        }
+
+        .insights-list li {
+            margin-bottom: 10px;
+            margin-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Prism Data Flow Examples</h1>
+        <p class="subtitle">How information transforms from sources to employee consumption</p>
+
+        <!-- EXAMPLE 1: EMAIL TASK -->
+        <div class="example">
+            <div class="example-title">
+                <div class="example-number">1</div>
+                Email from VP → Prioritized Work Item
+            </div>
+
+            <div class="flow-stage">
+                <div class="stage-label">SOURCE: EMAIL</div>
+                <div class="stage-title">Email Arrives</div>
+                <div class="stage-content">
+                    Subject: Q4 Retention Strategy - Need Your Input
+                    <div class="code-block">
+From: Sarah Chen (VP Product)
+To: john@company.com
+Time: Monday 9:15 AM
+
+"Hi John, can you review our Q4 retention proposal and send feedback by Friday EOD? This is critical for the board meeting. Thanks!"
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow">↓</div>
+
+            <div class="flow-stage">
+                <div class="stage-label">PROCESSING: AGGREGATION</div>
+                <div class="stage-title">NLP Detection & Parsing</div>
+                <div class="stage-content">
+                    System detects task signals in email using natural language processing:
+                    <div class="key-transformation">
+                        <strong>Detected Task:</strong> "Review Q4 retention proposal"<br>
+                        <strong>Action Type:</strong> Review/Feedback<br>
+                        <strong>Deadline:</strong> Friday 5:00 PM (explicit)<br>
+                        <strong>Requester:</strong> Sarah Chen (VP Product - high authority)<br>
+                        <strong>Priority Signal:</strong> "critical for board meeting"<br>
+                        <strong>Estimated Effort:</strong> 2-3 hours (based on task type)
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow">↓</div>
+
+            <div class="flow-stage">
+                <div class="stage-label">PROCESSING: PRIORITIZATION</div>
+                <div class="stage-title">Multi-Factor Scoring</div>
+                <div class="stage-content">
+                    Prioritization engine evaluates multiple factors:
+                    <div class="code-block">
+DEADLINE FACTOR:        9/10  (due Friday, 4 days away)
+AUTHORITY FACTOR:      10/10  (VP-level request)
+BUSINESS IMPACT:        9/10  (board meeting, retention strategy)
+CAPACITY CHECK:         8/10  (3 hours available this week)
+BLOCKER STATUS:         0/10  (no one waiting on this)
+ORGANIZATIONAL PRIORITY: 7/10  (retention is Q4 focus)
+
+COMPOSITE SCORE: 8.8/10 → CRITICAL PRIORITY
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow">↓</div>
+
+            <div class="flow-stage">
+                <div class="stage-label">PROCESSING: CAPACITY ANALYSIS</div>
+                <div class="stage-title">Workload Assessment</div>
+                <div class="stage-content">
+                    System checks John's availability:
+                    <div class="key-transformation">
+                        <strong>Sprint Commitment This Week:</strong> 20 hours<br>
+                        <strong>Current Non-Project Work:</strong> 6 hours (other ad-hoc items)<br>
+                        <strong>Available Hours This Week:</strong> 40 - 26 = 14 hours<br>
+                        <strong>This Task Effort:</strong> 3 hours<br>
+                        <strong>Utilization After Task:</strong> 29/40 = 72.5% (healthy)<br>
+                        <strong>Recommended Start:</strong> Wednesday morning (allows buffer before Friday deadline)
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow">↓</div>
+
+            <div class="flow-stage">
+                <div class="stage-label">STORAGE</div>
+                <div class="stage-title">Work Item Created & Stored</div>
+                <div class="stage-content">
+                    System creates work item with full context:
+                    <div class="code-block">
+ID: WI-2847
+Title: Review Q4 Retention Proposal
+Source: Email (sarah.chen@company.com)
+Deadline: Friday 5:00 PM
+Priority Level: CRITICAL
+Effort Estimate: 3 hours
+Manager: Direct from VP
+Status: Pending
+Related: Board meeting, Q4 retention initiative
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow">↓</div>
+
+            <div class="flow-stage">
+                <div class="stage-label">OUTPUT & CONSUMPTION</div>
+                <div class="stage-title">Employee Sees in Work Queue</div>
+                <div class="stage-content">
+                    John opens Prism on Wednesday morning:
+                </div>
+            </div>
+
+            <div class="outcome-box">
+                <div class="outcome-title">🔴 CRITICAL PRIORITY</div>
+                <div class="outcome-content">
+                    <strong>Review Q4 Retention Proposal</strong><br>
+                    Due: Friday 5:00 PM (2 days)<br>
+                    Effort: 3 hours<br>
+                    From: Sarah Chen (VP Product)<br>
+                    <br>
+                    <strong>Why This Priority?</strong><br>
+                    • VP-level request (highest authority)<br>
+                    • Deadline in 2 days<br>
+                    • Critical for board meeting<br>
+                    • You have 14 hours available this week<br>
+                    • Recommended: Start today (Wed morning) to finish by Thursday<br>
+                    <br>
+                    <strong>Context:</strong> Linked to Q4 organizational priority: Customer Retention
+                </div>
+            </div>
+
+            <div class="summary">
+                <div class="summary-title">✓ Outcome</div>
+                <div class="summary-content">
+                    John now knows: exactly what to do, why it's important, when to start, and how long it should take. He can protect 3 hours on Wednesday/Thursday and confidently commit to the Friday deadline.
+                </div>
+            </div>
+        </div>
+
+        <!-- EXAMPLE 2: SLACK MESSAGE -->
+        <div class="example">
+            <div class="example-title">
+                <div class="example-number">2</div>
+                Slack Mention → Contextual Task
+            </div>
+
+            <div class="flow-stage">
+                <div class="stage-label">SOURCE: SLACK</div>
+                <div class="stage-title">Message Arrives</div>
+                <div class="stage-content">
+                    <div class="code-block">
+#product-planning channel, 2:30 PM:
+
+@john "Hey John, can you join the customer health review call Thursday at 3pm?
+We need your API performance insights. Let me know ASAP if that time doesn't work."
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow">↓</div>
+
+            <div class="flow-stage">
+                <div class="stage-label">PROCESSING: AGGREGATION</div>
+                <div class="stage-title">Signal Detection</div>
+                <div class="stage-content">
+                    System identifies task and context:
+                    <div class="key-transformation">
+                        <strong>Task Type:</strong> Meeting attendance + preparation<br>
+                        <strong>Deadline:</strong> Thursday 3:00 PM<br>
+                        <strong>Requester:</strong> Product Manager (mid-level)<br>
+                        <strong>Preparation Needed:</strong> API performance insights (2-3 hours)<br>
+                        <strong>Meeting Duration:</strong> ~1 hour<br>
+                        <strong>Priority Signal:</strong> "ASAP" + customer health (moderate-high importance)
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow">↓</div>
+
+            <div class="flow-stage">
+                <div class="stage-label">PROCESSING: CALENDAR INTEGRATION</div>
+                <div class="stage-title">Availability Check</div>
+                <div class="stage-content">
+                    System checks John's calendar:
+                    <div class="key-transformation">
+                        <strong>Thursday 3:00 PM:</strong> FREE ✓<br>
+                        <strong>Preparation Time Needed:</strong> 3 hours<br>
+                        <strong>Available Windows Before Thursday 3pm:</strong><br>
+                        • Tuesday afternoon: 3 hours<br>
+                        • Wednesday morning: 4 hours<br>
+                        • Thursday morning: 2 hours<br>
+                        <strong>Recommended Prep Time:</strong> Wednesday (full 3 hours available)
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow">↓</div>
+
+            <div class="flow-stage">
+                <div class="stage-label">PROCESSING: PRIORITIZATION</div>
+                <div class="stage-title">Context-Aware Scoring</div>
+                <div class="stage-content">
+                    <div class="code-block">
+DEADLINE FACTOR:         7/10  (Thursday 3pm - 2 days)
+AUTHORITY FACTOR:        6/10  (Product Manager - mid-level)
+BUSINESS IMPACT:         7/10  (customer health review)
+CALENDAR CONFLICT:       0/10  (no conflict detected)
+PREP TIME AVAILABLE:     9/10  (full 3 hours available Wed)
+CAPACITY:                8/10  (still at 72.5% utilization)
+
+COMPOSITE SCORE: 7.3/10 → HIGH PRIORITY
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow">↓</div>
+
+            <div class="flow-stage">
+                <div class="stage-label">OUTPUT & CONSUMPTION</div>
+                <div class="stage-title">John Sees in Queue</div>
+                <div class="stage-content">
+                    Later that day, when John checks Prism:
+                </div>
+            </div>
+
+            <div class="outcome-box">
+                <div class="outcome-title">🟠 HIGH PRIORITY</div>
+                <div class="outcome-content">
+                    <strong>Prepare for Customer Health Review</strong><br>
+                    Meeting: Thursday 3:00 PM (1 hour)<br>
+                    Prep Time Needed: 3 hours<br>
+                    From: Product Manager (via Slack)<br>
+                    <br>
+                    <strong>What You Need to Do:</strong><br>
+                    1. Prepare API performance insights (3 hours)<br>
+                    2. Join Thursday 3pm call<br>
+                    <br>
+                    <strong>Recommended Timeline:</strong><br>
+                    • Wednesday (full 3 hours available for prep)<br>
+                    • Thursday 3pm: Attend call<br>
+                    <br>
+                    <strong>Why This Priority?</strong><br>
+                    • Customer health review (business impact)<br>
+                    • Only 3 hours prep time needed<br>
+                    • You have available time Wednesday morning
+                </div>
+            </div>
+
+            <div class="summary">
+                <div class="summary-title">✓ Outcome</div>
+                <div class="summary-content">
+                    John can respond to the Slack message immediately: "Yes, Thursday 3pm works. I'll have API performance insights ready." He blocks Wednesday morning for prep and Thursday 3pm for the call—all coordinated in Prism.
+                </div>
+            </div>
+        </div>
+
+        <!-- EXAMPLE 3: MANAGER PRIORITY -->
+        <div class="example">
+            <div class="example-title">
+                <div class="example-number">3</div>
+                Manager Priority → Team Alignment
+            </div>
+
+            <div class="flow-stage">
+                <div class="stage-label">SOURCE: MANAGER INPUT</div>
+                <div class="stage-title">Manager Sets Priority</div>
+                <div class="stage-content">
+                    In Tuesday standup, John's manager says:
+                    <div class="code-block">
+"Team, we need to focus on improving our response time to support tickets.
+This is going to be a big deal for customer satisfaction next quarter.
+I want everyone to spend about 5 hours this week on this."
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow">↓</div>
+
+            <div class="flow-stage">
+                <div class="stage-label">PROCESSING: PRIORITY INTERPRETATION</div>
+                <div class="stage-title">Manager Intent Analysis</div>
+                <div class="stage-content">
+                    System extracts and structures:
+                    <div class="key-transformation">
+                        <strong>Manager Priority:</strong> Improve support ticket response time<br>
+                        <strong>Scope:</strong> Team-wide initiative<br>
+                        <strong>Timeline:</strong> This week (start immediately)<br>
+                        <strong>Recommended Effort:</strong> 5 hours per person<br>
+                        <strong>Business Impact:</strong> Customer satisfaction (high)<br>
+                        <strong>Type:</strong> Manager-directed (not urgent, but important)
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow">↓</div>
+
+            <div class="flow-stage">
+                <div class="stage-label">PROCESSING: CAPACITY PLANNING</div>
+                <div class="stage-title">Allocation Strategy</div>
+                <div class="stage-content">
+                    System determines how to fit this into John's week:
+                    <div class="key-transformation">
+                        <strong>This Week Capacity:</strong> 14 hours available<br>
+                        <strong>Critical Priority Items:</strong> 3 hours (retention proposal)<br>
+                        <strong>High Priority Items:</strong> 4 hours (customer health + prep)<br>
+                        <strong>Remaining Capacity:</strong> 7 hours<br>
+                        <strong>Allocation for Manager Priority:</strong> 5 hours<br>
+                        <strong>Final Utilization:</strong> 39/40 hours (97.5% - optimal)
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow">↓</div>
+
+            <div class="flow-stage">
+                <div class="stage-label">OUTPUT & CONSUMPTION</div>
+                <div class="stage-title">John Sees Manager Priority in Queue</div>
+                <div class="stage-content">
+                    When John checks Prism Wednesday morning:
+                </div>
+            </div>
+
+            <div class="outcome-box">
+                <div class="outcome-title">🟡 MANAGER PRIORITY</div>
+                <div class="outcome-content">
+                    <strong>Improve Support Ticket Response Time</strong><br>
+                    Time Allocation: 5 hours this week<br>
+                    Assigned By: Your Manager<br>
+                    <br>
+                    <strong>What This Means:</strong><br>
+                    Spend focused time this week reviewing and improving our ticket response workflow. This is important for customer satisfaction next quarter.<br>
+                    <br>
+                    <strong>Your Week Breakdown:</strong><br>
+                    • Wednesday: 3 hours prep for retention proposal<br>
+                    • Wednesday afternoon: 2 hours on support response improvements<br>
+                    • Thursday: Customer health meeting + 1 hour on support improvements<br>
+                    • Friday: 2 more hours on response improvements<br>
+                    <br>
+                    <strong>Total Workload:</strong> 40 hours (optimal allocation)<br>
+                    • Retention proposal: 3 hours<br>
+                    • Customer health: 4 hours<br>
+                    • Manager priority (support): 5 hours<br>
+                    • Sprint work: 20 hours<br>
+                    • Buffer: 8 hours
+                </div>
+            </div>
+
+            <div class="summary">
+                <div class="summary-title">✓ Outcome</div>
+                <div class="summary-content">
+                    John sees how the manager priority fits into his week without overloading. He can confidently contribute to the team initiative while still meeting critical deadlines. His manager sees the team is aligned and has realistic capacity for the initiative.
+                </div>
+            </div>
+        </div>
+
+        <!-- EXAMPLE 4: ORG PRIORITY CASCADE -->
+        <div class="example">
+            <div class="example-title">
+                <div class="example-number">4</div>
+                Organizational Priority → Individual Work
+            </div>
+
+            <div class="flow-stage">
+                <div class="stage-label">SOURCE: LEADERSHIP ANNOUNCEMENT</div>
+                <div class="stage-title">CEO Sets Company Priority</div>
+                <div class="stage-content">
+                    In company all-hands, CEO announces:
+                    <div class="code-block">
+"Q4 Theme: Customer Success at Scale
+Our biggest priority is ensuring we deliver exceptional customer outcomes
+as we scale to enterprise customers. This touches every team."
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow">↓</div>
+
+            <div class="flow-stage">
+                <div class="stage-label">PROCESSING: CASCADE PLANNING</div>
+                <div class="stage-title">Translate to Team Level</div>
+                <div class="stage-content">
+                    VP Product translates for engineering:
+                    <div class="key-transformation">
+                        <strong>Company Priority:</strong> Customer Success at Scale<br>
+                        <strong>VP Translation:</strong> Enterprise customers need reliable, scalable APIs<br>
+                        <strong>Eng Director Interpretation:</strong> Focus on API reliability and performance<br>
+                        <strong>Manager Application:</strong> Support team should improve response times and fix critical bugs
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow">↓</div>
+
+            <div class="flow-stage">
+                <div class="stage-label">PROCESSING: INDIVIDUAL RELEVANCE</div>
+                <div class="stage-title">Map to John's Role</div>
+                <div class="stage-content">
+                    System determines how org priority affects John:
+                    <div class="key-transformation">
+                        <strong>John's Role:</strong> API Performance Engineer<br>
+                        <strong>Relevant Work:</strong><br>
+                        • Reduce API latency (customer success impact)<br>
+                        • Fix critical performance bugs<br>
+                        • Improve monitoring and alerting<br>
+                        <br>
+                        <strong>This Week Opportunity:</strong><br>
+                        Manager priority (support response) directly contributes to org priority (customer success at scale)
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow">↓</div>
+
+            <div class="flow-stage">
+                <div class="stage-label">OUTPUT & CONSUMPTION</div>
+                <div class="stage-title">John Sees Connected Priorities</div>
+                <div class="stage-content">
+                    In Prism, all items linked to org priority:
+                </div>
+            </div>
+
+            <div class="outcome-box">
+                <div class="outcome-title">📊 ORGANIZATIONAL ALIGNMENT</div>
+                <div class="outcome-content">
+                    <strong>Company Priority This Quarter:</strong><br>
+                    "Customer Success at Scale"<br>
+                    <br>
+                    <strong>Your Contributions This Week:</strong><br>
+                    <br>
+                    1. <span class="highlight">Improve Support Ticket Response Time</span> (5 hours)<br>
+                       → Directly supports enterprise customer success<br>
+                    <br>
+                    2. <span class="highlight">Review Q4 Retention Proposal</span> (3 hours)<br>
+                       → Supports customer retention strategy<br>
+                    <br>
+                    <strong>How It Connects:</strong><br>
+                    Your work this week contributes 8 hours toward company priority of improving customer outcomes. You're helping us scale successfully.
+                </div>
+            </div>
+
+            <div class="summary">
+                <div class="summary-title">✓ Outcome</div>
+                <div class="summary-content">
+                    John understands how his work connects to company strategy. He's not just "fixing tickets"—he's enabling "Customer Success at Scale." This visibility increases engagement and aligns individual effort with organizational goals.
+                </div>
+            </div>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <!-- INSIGHTS -->
+        <div class="insights">
+            <div class="insights-title">Key Insights from These Examples</div>
+            <ul class="insights-list">
+                <li><strong>Multi-Source Clarity:</strong> Information from email, Slack, calendars, and managers automatically flows into one prioritized queue. No context-switching between tools.</li>
+
+                <li><strong>Intelligent Synthesis:</strong> System doesn't just collect—it interprets deadlines, authority levels, business impact, and capacity constraints to create meaningful prioritization.</li>
+
+                <li><strong>Confidence in Commitments:</strong> By seeing full capacity visibility, John can confidently say "yes" to manager requests without overcommitting. He can see where new work fits.</li>
+
+                <li><strong>Strategic Alignment:</strong> Ad-hoc work (response times, reviews) is automatically connected to organizational strategy (customer success). John sees why his work matters.</li>
+
+                <li><strong>Time Optimization:</strong> Rather than "I'm busy," John gets "here's your optimized week: retention review Wed, customer health Thu, support improvements Thu-Fri, sprint work distributed."</li>
+
+                <li><strong>Manager Efficiency:</strong> Managers don't need to manually track who's doing what. They see the team is aligned, has capacity for new initiatives, and understands priorities.</li>
+
+                <li><strong>Reduced Meetings:</strong> By the time standup happens, everyone has already seen their priorities in Prism. Standup is about exception handling, not priority broadcasting.</li>
+
+                <li><strong>Continuous Improvement:</strong> Every override, late completion, or early finish teaches the system. Next week's recommendations are more accurate.</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
