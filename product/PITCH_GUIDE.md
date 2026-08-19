@@ -326,6 +326,261 @@ Prism intelligently aggregates all non-project work signals from existing system
 
 ---
 
+---
+
+## 🏆 Competitive Landscape & Positioning
+
+### **Direct Competitors**
+
+#### **Microsoft Loop (Microsoft 365)**
+**What it is:** Collaborative work hub within Microsoft 365
+
+**Strengths:**
+- Deep Outlook/Teams integration
+- Collaboration-first design
+- Built into Microsoft ecosystem
+
+**Weaknesses:**
+- Not designed for prioritization
+- Doesn't manage non-project work
+- Treats all items equally
+
+**How to Position Against:**
+> "Loop is great for collaboration. Prism is great for prioritization. They're complementary. Loop helps teams work together; Prism helps individuals know what to work on. You can use both."
+
+**What to Say to Loop Users:**
+> "You probably use Loop for collaboration. Prism handles what Loop doesn't: intelligent prioritization of your non-project work based on deadlines, capacity, org strategy, and dependencies."
+
+---
+
+#### **Notion / Coda (Work Platforms)**
+**What it is:** Flexible database + documents + team management platform
+
+**Strengths:**
+- Highly customizable
+- Allows many use cases
+- Can build custom workflows
+
+**Weaknesses:**
+- Requires setup/configuration
+- Doesn't auto-aggregate work signals
+- Not purpose-built for prioritization
+- No learning/AI recommendations
+
+**How to Position Against:**
+> "Notion is flexible—you can build almost anything. But prioritization requires structure and data from multiple systems. Prism is purpose-built for that specific problem. It just works without months of setup."
+
+**What to Say to Notion Users:**
+> "You've probably tried to build a prioritization system in Notion. It requires constant manual data entry and discipline. Prism does this automatically by reading from your email, Slack, calendar, etc. Same outcome, 10x less work."
+
+---
+
+#### **Slack (Communication Platform)**
+**What it is:** Chat/messaging platform where much work happens
+
+**Strengths:**
+- Where work signals originate
+- Team communication hub
+- Deeply embedded in orgs
+
+**Weaknesses:**
+- No prioritization logic
+- Backlog of unread messages
+- Doesn't integrate calendar, deadlines
+- Not designed for decision-making
+
+**How to Position Against:**
+> "Slack is where communication happens. Prism is where you make decisions based on that communication plus calendars, email, manager input, and org priorities. Prism reads from Slack; it doesn't replace it."
+
+**What to Say to Slack Users:**
+> "You're drowning in Slack messages, right? Some are important, some are FYI. Prism reads those messages, understands priority based on who sent it and what they're asking, and surfaces the important ones with context."
+
+---
+
+### **Adjacent/Complementary Products**
+
+#### **Jira / Azure DevOps / Asana (Project Management)**
+**Position:** NOT a competitor—complementary
+
+**Key Message:**
+> "Jira manages project work brilliantly. Prism handles the 40-60% that's non-project: emails from customers, manager asks, org initiatives, ad-hoc reviews. They're designed to work together."
+
+**What to Say to Project Tool Users:**
+> "Your sprint work stays in Jira. That's perfect. Prism handles everything else—the stuff that doesn't fit in sprints. The customer emails, the urgent requests, the manager priorities. Together they give you a complete picture of your work."
+
+---
+
+#### **Workday / BambooHR (HR Platforms)**
+**Position:** Integration partner, not competitor
+
+**Key Message:**
+> "Workday manages people and org data. Prism reads that org structure to cascade priorities properly. We're not replacing Workday; we're making it more valuable by using its data."
+
+---
+
+### **Indirect Competition: Better Email/Calendar Management**
+
+#### **Gmail Smart Priority, Outlook Focused Inbox**
+**What they do:** Email prioritization features
+
+**Weaknesses vs. Prism:**
+- Only handle email, not Slack/Teams/calendar
+- Don't understand capacity or dependencies
+- Don't show full work picture
+- Don't cascade org priorities
+
+**How to Position Against:**
+> "Email prioritization helps with email. But 40% of work comes from Slack, meetings, manager conversations. Prism handles all of it together, giving you a complete picture."
+
+---
+
+#### **Calendar Blocking Tools (Clockwise, Fantastical, etc.)**
+**What they do:** Calendar optimization and time blocking
+
+**Weaknesses vs. Prism:**
+- Don't prioritize work, just find time
+- Don't integrate email/Slack signals
+- Assume you already know what to work on
+- Don't show org strategy connection
+
+**How to Position Against:**
+> "Calendar tools help you find time. Prism tells you what to fill that time with. Use both—Prism prioritizes, calendar tools optimize when you work."
+
+---
+
+### **The Competitive Advantage: Why Prism Wins**
+
+| Factor | Email/Calendar | Project Tools | Slack | Notion | Prism |
+|--------|---|---|---|---|---|
+| **Aggregates all signals** | ❌ | ❌ | ❌ | ❌ | ✅ |
+| **Auto-detects work items** | ❌ | ❌ | ❌ | ❌ | ✅ |
+| **Intelligent prioritization** | ❌ | ❌ | ❌ | ❌ | ✅ |
+| **Capacity awareness** | ❌ | ❌ | ❌ | ❌ | ✅ |
+| **Org priority alignment** | ❌ | ❌ | ❌ | ❌ | ✅ |
+| **Learns & improves** | ❌ | ❌ | ❌ | ❌ | ✅ |
+| **Works with existing tools** | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Prevents overallocation** | ❌ | ❌ | ❌ | ❌ | ✅ |
+
+---
+
+### **Objections from Competitor Users**
+
+#### **"We already have Jira"**
+> "Great. Your project work is tracked. But what about the customer emails, the manager asks, the org initiatives? Those don't fit in Jira. Prism handles those. You'll use both."
+
+#### **"We use Notion for this"**
+> "How much time do you spend updating Notion every day? Prism does this automatically from your email and Slack. Same view, zero manual work."
+
+#### **"Slack already shows us everything"**
+> "Slack shows you everything, but unfiltered. 100+ messages a day, you don't know what's important. Prism reads those messages and tells you what actually matters given your capacity and org priorities."
+
+#### **"Email management tools show what's important"**
+> "Email tools prioritize email. But 40-50% of your work is in Slack, meetings, manager conversations. Prism sees all of it together."
+
+#### **"We have OKRs and priorities set"**
+> "Exactly. But can you see if the org is actually focused on them? Or is everyone buried in operational work? Prism shows you that. It helps you execute your strategy."
+
+---
+
+### **The Blue Ocean Strategy**
+
+**The key insight:** No one is solving "intelligent aggregation of non-project work with organizational alignment and capacity awareness."
+
+**Jira** owns: Project management  
+**Slack** owns: Communication  
+**Email** owns: External messaging  
+**Calendar** owns: Time blocking  
+
+**The gap:** Who owns "what should I actually do right now given everything in my life?"
+
+**Prism owns:** That gap.
+
+---
+
+### **How to Frame the Competitive Position**
+
+**When asked "Why not just use X?"**
+
+**If X is Jira:**
+> "Jira handles your formal projects perfectly. Prism handles the work outside Jira. Together they give you 100% visibility."
+
+**If X is Slack:**
+> "Slack is where communication happens. Prism is where you make decisions. You need both."
+
+**If X is Email:**
+> "Email shows you what arrived. Prism tells you what matters. Different problems."
+
+**If X is Notion/Asana:**
+> "Those require manual effort to stay updated. Prism is automatic. Less overhead, more accuracy."
+
+**If X is calendar tools:**
+> "Calendar tools find you time. Prism tells you what to do with that time."
+
+---
+
+### **Positioning Summary**
+
+**Prism is NOT:**
+- A replacement for project management tools ❌
+- A Slack/Teams replacement ❌
+- An email client ❌
+- A collaboration tool ❌
+- A calendar app ❌
+
+**Prism IS:**
+- A prioritization engine that reads from all of those ✅
+- The missing layer between communication and decision-making ✅
+- The system that translates strategy into execution ✅
+- The tool that prevents overload and burnout ✅
+
+---
+
+### **Sales Talking Points Against Competitors**
+
+| Competitor | Their Strength | Your Angle |
+|-----------|---|---|
+| Jira | Project management | "We complement that. We handle what Jira doesn't." |
+| Slack | Communication | "We prioritize what Slack communicates." |
+| Email | External messaging | "We synthesize email with everything else." |
+| Notion | Flexibility | "We're purpose-built. No setup. Just works." |
+| Loop | Microsoft integration | "We work with Microsoft AND everyone else." |
+
+---
+
+### **Win-Loss Situations**
+
+**You WIN when:**
+- Customer is drowning in non-project work signals across multiple tools
+- They've tried to build a solution in Notion/Asana and abandoned it
+- They need to cascade org priorities and see if they're sticking
+- They have burnout/retention issues from overload
+- They want capacity visibility across teams
+
+**You LOSE when:**
+- Customer only has formal project work (all in Jira)
+- They're a small team (<10 people) that already self-coordinates
+- They have strict tool limitations (can't integrate new systems)
+- Privacy/data concerns are hard barriers
+- They prefer building custom solutions (Notion obsessives)
+
+---
+
+### **After Losing to a Competitor**
+
+**Ask this question:**
+> "What made X the better choice for you?"
+
+**Listen for:**
+- Cost (Prism might be cheaper or bundled)
+- Integration (Prism might integrate better)
+- Feature completeness (Prism might add what they need)
+- Trust (might be Microsoft/Salesforce standard)
+
+**Follow up with:**
+> "If we addressed [X], would you reconsider in 6 months?"
+
+---
+
 ## 💡 Pro Tips
 
 1. **Always Start With Their Pain** - Lead with their specific problem, not your solution
