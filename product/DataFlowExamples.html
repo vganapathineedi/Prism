@@ -664,6 +664,289 @@ as we scale to enterprise customers. This touches every team."
             </div>
         </div>
 
+        <!-- NEGATIVE SCENARIOS: OVERLOAD HANDLING -->
+        <div class="section-divider">
+            <h2 style="color: #1a1a1a; font-size: 28px; font-weight: 600; margin-bottom: 40px;">⚠️ Negative Scenarios: Handling Overload</h2>
+        </div>
+
+        <!-- NEGATIVE EXAMPLE 1: TOO MANY PRIORITIES -->
+        <div class="example" style="border-left-color: #dc2626;">
+            <div class="example-title">
+                <div class="example-number" style="background: #dc2626;">5</div>
+                Too Many Critical Items → Overallocation Alert
+            </div>
+
+            <div class="flow-stage">
+                <div class="stage-label" style="background: #dc2626;">PROBLEM: OVERLOAD DETECTED</div>
+                <div class="stage-title">Multiple New Requests in Same Week</div>
+                <div class="stage-content">
+                    Friday afternoon: John's manager assigns another critical initiative
+                    <div class="code-block">
+"John, we just got urgent request from enterprise customer.
+They need custom API integration by next Friday.
+This is going to be 20+ hours of work. Can you take this?"
+                    </div>
+                    At the same time:
+                    <div class="code-block">
+Email from CEO: "All engineers review and contribute to new security audit. Deadline: Wednesday."
+</div>
+                    And:
+                    <div class="code-block">
+Slack from another manager: "Need you for architecture review on new microservices. 4 hours this week."
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow">↓</div>
+
+            <div class="flow-stage">
+                <div class="stage-label" style="background: #dc2626;">DETECTION: OVERALLOCATION</div>
+                <div class="stage-title">System Calculates Capacity Violation</div>
+                <div class="stage-content">
+                    System immediately flags overallocation:
+                    <div class="key-transformation" style="background: #fee2e2; border-color: #dc2626; color: #7f1d1d;">
+                        <strong>Current Week Remaining:</strong> 2 days (Wed-Fri)<br>
+                        <strong>Available Hours:</strong> 8 hours (including today's work)<br>
+                        <br>
+                        <strong>NEW REQUESTS TOTAL:</strong><br>
+                        • Enterprise integration: 20 hours (needs to start immediately!)<br>
+                        • Security audit prep: 4 hours<br>
+                        • Architecture review: 4 hours<br>
+                        <strong>NEW TOTAL:</strong> 28 hours<br>
+                        <br>
+                        <strong>ACTUAL CAPACITY:</strong> 8 hours<br>
+                        <strong>OVERALLOCATION:</strong> 350% over capacity ❌
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow">↓</div>
+
+            <div class="flow-stage">
+                <div class="stage-label" style="background: #dc2626;">SYSTEM RESPONSE: ALERT & RECOMMENDATION</div>
+                <div class="stage-title">Immediate Escalation</div>
+                <div class="stage-content">
+                    Prism immediately generates alerts and recommendations:
+                </div>
+            </div>
+
+            <div class="outcome-box" style="background: #fef2f2; border-color: #fca5a5; border-left-color: #dc2626;">
+                <div class="outcome-title" style="color: #7f1d1d;">🚨 CRITICAL OVERALLOCATION</div>
+                <div class="outcome-content" style="color: #991b1b;">
+                    <strong>⚠️ You have 350% more work than available capacity this week</strong><br>
+                    <br>
+                    <strong>Current Commitments:</strong><br>
+                    • Retention proposal: 3 hours (Wed)<br>
+                    • Customer health: 4 hours (Thu)<br>
+                    • Support improvements: 5 hours<br>
+                    • Sprint work: 20 hours<br>
+                    <strong>Subtotal: 32 hours</strong><br>
+                    <br>
+                    <strong>New Requests (This Week):</strong><br>
+                    • Enterprise integration: 20 hours (immediate start!)<br>
+                    • Security audit: 4 hours<br>
+                    • Architecture review: 4 hours<br>
+                    <strong>Subtotal: 28 hours</strong><br>
+                    <br>
+                    <strong>Total Demand: 60 hours | Available: 8 hours</strong><br>
+                    <br>
+                    <strong>RECOMMENDED ACTIONS:</strong><br>
+                    <br>
+                    ✗ <strong>DO NOT COMMIT</strong> to all three this week<br>
+                    <br>
+                    <strong>OPTION 1 - Negotiate Timeline (RECOMMENDED):</strong><br>
+                    "I can start enterprise integration immediately, but security audit and architecture review should move to next week. This prevents quality issues and missed deadlines."<br>
+                    <br>
+                    <strong>OPTION 2 - Defer Lower Priority Work:</strong><br>
+                    Move "Support improvements" (5 hrs, manager priority) to next week. Keep critical deadline work (retention, customer health).<br>
+                    <br>
+                    <strong>OPTION 3 - Request Temporary Help:</strong><br>
+                    Ask if another engineer can help with security audit or architecture review to distribute load.<br>
+                    <br>
+                    <strong>OPTION 4 - Split Work Across Weeks:</strong><br>
+                    Enterprise integration: 12 hours this week, 8 hours next week<br>
+                    Delay other two requests until Week 2
+                </div>
+            </div>
+
+            <div class="summary" style="background: #fef3c7; border-color: #fcd34d; border-left-color: #f59e0b;">
+                <div class="summary-title" style="color: #92400e;">💡 Manager & Employee Communication</div>
+                <div class="summary-content" style="color: #b45309;">
+                    <strong>What John Can Say (Prism-backed):</strong><br>
+                    "I want to help with all three, but I'm currently at 100% capacity with critical work. Here's the math: I have 40 hours available, and I'm committed to 32 hours already. These three new requests are 28 hours. I can either: (1) start enterprise integration immediately and move the other two to next week, (2) get help from [colleague], or (3) defer the support improvements to next week."<br>
+                    <br>
+                    <strong>Manager Sees in Prism:</strong><br>
+                    ✓ John is indeed overallocated<br>
+                    ✓ See exact breakdown of commitments<br>
+                    ✓ Understand the trade-offs<br>
+                    ✓ Make informed decision about which work is truly critical<br>
+                    ✓ Avoid forcing bad commits
+                </div>
+            </div>
+        </div>
+
+        <!-- NEGATIVE EXAMPLE 2: CASCADING MISS -->
+        <div class="example" style="border-left-color: #dc2626;">
+            <div class="example-title">
+                <div class="example-number" style="background: #dc2626;">6</div>
+                Cascade Effect: One Miss Creates Multiple Problems
+            </div>
+
+            <div class="flow-stage">
+                <div class="stage-label" style="background: #dc2626;">PROBLEM: MISSED DEADLINE</div>
+                <div class="stage-title">John Misses Security Audit Review (Wed)</div>
+                <div class="stage-content">
+                    Wednesday morning arrives. John is deep in enterprise integration work and realizes he won't finish security audit review by today's deadline.
+                    <div class="key-transformation" style="background: #fee2e2; border-color: #dc2626; color: #7f1d1d;">
+                        <strong>Original Plan:</strong> Complete security audit review Wed 4pm<br>
+                        <strong>Actual Status:</strong> 30% complete, won't finish until Friday<br>
+                        <strong>Deadline Impact:</strong> Company-wide security initiative blocked
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow">↓</div>
+
+            <div class="flow-stage">
+                <div class="stage-label" style="background: #dc2626;">SYSTEM DETECTION: MISS IN PROGRESS</div>
+                <div class="stage-title">Early Warning Before Deadline</div>
+                <div class="stage-content">
+                    Prism's continuous monitoring detects the risk:
+                    <div class="code-block">
+[11:30 AM Wed] John still on enterprise integration task.
+Security audit review: ZERO progress
+Deadline: 4:00 PM today (4.5 hours remaining)
+Work needed: 4 hours
+Status: ON TRACK TO MISS ❌
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow">↓</div>
+
+            <div class="flow-stage">
+                <div class="stage-label" style="background: #dc2626;">SYSTEM RESPONSE: ESCALATION</div>
+                <div class="stage-title">Alert Multiple Stakeholders</div>
+                <div class="stage-content">
+                    Prism proactively notifies:
+                </div>
+            </div>
+
+            <div class="outcome-box" style="background: #fef2f2; border-color: #fca5a5; border-left-color: #dc2626;">
+                <div class="outcome-title" style="color: #7f1d1d;">🚨 DEADLINE AT RISK</div>
+                <div class="outcome-content" style="color: #991b1b;">
+                    <strong>John Receives Alert (11:30 AM):</strong><br>
+                    "Security audit review due in 4.5 hours. You're currently 0% complete and need 4 hours of focused work. At your current pace on enterprise integration, you will NOT meet this deadline. Take action now."<br>
+                    <br>
+                    <strong>Options Presented:</strong><br>
+                    • Stop enterprise work now, switch to security review (risky for that deadline)<br>
+                    • Ask manager to defer security review to Friday<br>
+                    • Ask colleague to help with one of the two critical items<br>
+                    • Request 2-hour deadline extension<br>
+                    <br>
+                    <strong>John's Manager Receives Alert (11:35 AM):</strong><br>
+                    "Security audit review (company priority) is at risk. John is overallocated between enterprise integration (20 hrs) and current commitments (32 hrs). Recommend immediate decision on which deadline is truly critical."<br>
+                    <br>
+                    <strong>Company Security Lead Receives Alert (11:40 AM):</strong><br>
+                    "Potential miss on security audit review deadline (Wed 4pm). John is primary owner. ETA for completion: Friday afternoon. Recommend discussing with engineering leadership."
+                </div>
+            </div>
+
+            <div class="summary" style="background: #fef3c7; border-color: #fcd34d; border-left-color: #f59e0b;">
+                <div class="summary-title" style="color: #92400e;">💡 What This Prevents</div>
+                <div class="summary-content" style="color: #b45309;">
+                    <strong>Without Prism:</strong> Wednesday 4:00 PM passes. Security lead waits for review. Doesn't know why. No one told them. Thursday morning: "Where's the review?" Panic. Cascading delays through Friday. Lost credibility.<br>
+                    <br>
+                    <strong>With Prism:</strong> 4.5 hours before deadline, three stakeholders know. Quick decision: defer security review to Friday (less critical than enterprise deadline). Clear communication. No panic. Trust maintained.
+                </div>
+            </div>
+        </div>
+
+        <!-- NEGATIVE EXAMPLE 3: RECURRING PATTERN -->
+        <div class="example" style="border-left-color: #dc2626;">
+            <div class="example-title">
+                <div class="example-number" style="background: #dc2626;">7</div>
+                Pattern Detection: Chronic Overallocation
+            </div>
+
+            <div class="flow-stage">
+                <div class="stage-label" style="background: #dc2626;">PROBLEM: PATTERN EMERGES</div>
+                <div class="stage-title">John Has Been Overallocated 3 Weeks in a Row</div>
+                <div class="stage-content">
+                    <div class="key-transformation" style="background: #fee2e2; border-color: #dc2626; color: #7f1d1d;">
+                        <strong>Week 1:</strong> 115% capacity - missed support improvements deadline<br>
+                        <strong>Week 2:</strong> 108% capacity - delivered late on architecture review<br>
+                        <strong>Week 3:</strong> 120% capacity - shipping quality degraded, 2 bugs in production<br>
+                        <br>
+                        <strong>Pattern:</strong> Consistently over 105% → burnout risk
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow">↓</div>
+
+            <div class="flow-stage">
+                <div class="stage-label" style="background: #dc2626;">DETECTION: TREND ANALYSIS</div>
+                <div class="stage-title">System Recognizes Unsustainable Pattern</div>
+                <div class="stage-content">
+                    Prism's learning system detects the trend:
+                    <div class="code-block">
+ANALYSIS: John's 3-Week Trend
+- Average Utilization: 114% (unhealthy)
+- Missed Deadlines: 2 of 3 weeks
+- Quality Issues: 2 production bugs
+- After-Hours Work: +8 hours/week
+- Burnout Risk: HIGH
+
+RECOMMENDATION: Manager intervention needed
+                    </div>
+                </div>
+            </div>
+
+            <div class="arrow">↓</div>
+
+            <div class="flow-stage">
+                <div class="stage-label" style="background: #dc2626;">SYSTEM INTERVENTION: MANAGER & HR ALERT</div>
+                <div class="stage-title">Proactive Escalation</div>
+                <div class="stage-content">
+                    Multiple parties alerted:
+                </div>
+            </div>
+
+            <div class="outcome-box" style="background: #fef2f2; border-color: #fca5a5; border-left-color: #dc2626;">
+                <div class="outcome-title" style="color: #7f1d1d;">⚠️ UNSUSTAINABLE WORKLOAD PATTERN</div>
+                <div class="outcome-content" style="color: #991b1b;">
+                    <strong>John Receives Alert (Friday 4pm):</strong><br>
+                    "You've been overallocated 3 weeks in a row (avg 114% capacity). Missed 2 deadlines and experienced 2 quality issues. This isn't sustainable. Talk to your manager about redistributing work or adjusting expectations."<br>
+                    <br>
+                    <strong>Manager Receives Detailed Report:</strong><br>
+                    • John's utilization has been 114% average for 3 weeks<br>
+                    • Quality metrics degrading (2 production bugs)<br>
+                    • Missing deadlines on non-critical items<br>
+                    • Working +8 hours overtime per week<br>
+                    • Burnout risk assessment: HIGH<br>
+                    <br>
+                    <strong>Recommended Actions:</strong><br>
+                    ✓ Reduce non-critical commitments<br>
+                    ✓ Add headcount or redistribute work<br>
+                    ✓ Extend timelines on less critical projects<br>
+                    ✓ Check in on wellbeing<br>
+                    <br>
+                    <strong>HR receives anonymized alert:</strong><br>
+                    Employee [ID] showing burnout risk indicators. Manager has been notified. HR to follow up if pattern continues.
+                </div>
+            </div>
+
+            <div class="summary" style="background: #fef3c7; border-color: #fcd34d; border-left-color: #f59e0b;">
+                <div class="summary-title" style="color: #92400e;">💡 How Prism Prevents Burnout</div>
+                <div class="summary-content" style="color: #b45309;">
+                    <strong>Without Prism:</strong> Weeks 4-6 pass. John's performance continues to degrade. Manager assumes "John can't handle the role." No one knows it's overallocation. Employee engagement plummets. Turnover risk.<br>
+                    <br>
+                    <strong>With Prism:</strong> After Week 3, pattern is clear. Manager takes action immediately. Work is redistributed. John recovers. Quality improves. Retention improved.
+                </div>
+            </div>
+        </div>
+
         <div class="section-divider"></div>
 
         <!-- INSIGHTS -->
@@ -685,6 +968,18 @@ as we scale to enterprise customers. This touches every team."
                 <li><strong>Reduced Meetings:</strong> By the time standup happens, everyone has already seen their priorities in Prism. Standup is about exception handling, not priority broadcasting.</li>
 
                 <li><strong>Continuous Improvement:</strong> Every override, late completion, or early finish teaches the system. Next week's recommendations are more accurate.</li>
+
+                <li><strong>⚠️ Overallocation Prevention:</strong> When new requests arrive, Prism immediately calculates capacity impact. If overallocated, system alerts John and manager BEFORE he commits. No more "I didn't realize I was overloaded."</li>
+
+                <li><strong>⚠️ Deadline at Risk Early Warning:</strong> If John falls behind on a committed deadline, system detects it hours before the deadline (not after) and escalates to all stakeholders. Enables last-minute mitigation.</li>
+
+                <li><strong>⚠️ Burnout Pattern Detection:</strong> System tracks if employee is consistently overallocated (e.g., 3+ weeks at 105%+ capacity) and alerts manager + HR. Prevents burnout through data-driven intervention.</li>
+
+                <li><strong>⚠️ Negotiation Empowerment:</strong> When overloaded, Prism gives John data-backed options (push deadline, defer lower-priority work, get help, split across weeks). He can negotiate from facts, not feelings.</li>
+
+                <li><strong>⚠️ Accountability with Visibility:</strong> If John commits to 60 hours of work in 40 hours available, it's visible. Prevents "underpromise but overcommit." Leads to realistic planning.</li>
+
+                <li><strong>⚠️ Manager Decision Support:</strong> When John says "I can't do all three this week," manager can see exactly why with Prism's breakdown. Leads to intelligent prioritization, not blame.</li>
             </ul>
         </div>
     </div>
