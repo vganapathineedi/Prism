@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prism Architecture - Minimalist Information Flow</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f8f9fa;
+            padding: 60px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            padding: 60px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            text-align: center;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 60px;
+            font-size: 16px;
+        }
+
+        svg {
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+            height: auto;
+        }
+
+        .description {
+            margin-top: 60px;
+            padding: 30px;
+            background: #f9fafb;
+            border-left: 3px solid #4f46e5;
+            border-radius: 4px;
+            line-height: 1.7;
+        }
+
+        .description h3 {
+            color: #1a1a1a;
+            margin-bottom: 15px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .description p {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .description ul {
+            margin-left: 20px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .description li {
+            margin-bottom: 8px;
+        }
+
+        .flow-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .step-box {
+            padding: 16px;
+            background: #f0f4f8;
+            border-left: 3px solid #4f46e5;
+            border-radius: 4px;
+        }
+
+        .step-title {
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 8px;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .step-content {
+            color: #666;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Prism Information Flow Architecture</h1>
+        <p class="subtitle">Minimalist view of data transformation</p>
+
+        <svg viewBox="0 0 1200 500" xmlns="http://www.w3.org/2000/svg">
+            <!-- Define minimal gradient -->
+            <defs>
+                <linearGradient id="minGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:#f0f4f8;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#e8ecf1;stop-opacity:1" />
+                </linearGradient>
+
+                <marker id="arrowhead" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                    <polygon points="0 0, 10 3, 0 6" fill="#cbd5e1" />
+                </marker>
+            </defs>
+
+            <!-- STAGE 1: INPUTS -->
+            <rect x="50" y="80" width="200" height="280" fill="url(#minGrad)" stroke="#cbd5e1" stroke-width="1" rx="4"/>
+            <text x="150" y="110" text-anchor="middle" font-weight="600" font-size="14" fill="#1a1a1a">1. INPUTS</text>
+
+            <line x1="60" y1="125" x2="230" y2="125" stroke="#e2e8f0" stroke-width="1"/>
+
+            <text x="70" y="150" font-size="12" fill="#475569" font-weight="500">Email & Chat</text>
+            <text x="70" y="170" font-size="11" fill="#64748b">(Outlook, Gmail, Slack, Teams)</text>
+
+            <text x="70" y="200" font-size="12" fill="#475569" font-weight="500">Calendar</text>
+            <text x="70" y="220" font-size="11" fill="#64748b">(Meeting availability)</text>
+
+            <text x="70" y="250" font-size="12" fill="#475569" font-weight="500">Manager Input</text>
+            <text x="70" y="270" font-size="11" fill="#64748b">(Priorities & assignments)</text>
+
+            <text x="70" y="300" font-size="12" fill="#475569" font-weight="500">Org Hierarchy</text>
+            <text x="70" y="320" font-size="11" fill="#64748b">(Workday structure)</text>
+
+            <!-- Arrow 1 to 2 -->
+            <line x1="250" y1="220" x2="310" y2="220" stroke="#cbd5e1" stroke-width="2"/>
+            <polygon points="310,220 300,215 300,225" fill="#cbd5e1"/>
+
+            <!-- STAGE 2: PROCESS -->
+            <rect x="310" y="80" width="200" height="280" fill="url(#minGrad)" stroke="#cbd5e1" stroke-width="1" rx="4"/>
+            <text x="410" y="110" text-anchor="middle" font-weight="600" font-size="14" fill="#1a1a1a">2. PROCESS</text>
+
+            <line x1="320" y1="125" x2="490" y2="125" stroke="#e2e8f0" stroke-width="1"/>
+
+            <text x="330" y="150" font-size="12" fill="#475569" font-weight="500">Aggregate</text>
+            <text x="330" y="170" font-size="11" fill="#64748b">NLP task detection</text>
+
+            <text x="330" y="200" font-size="12" fill="#475569" font-weight="500">Analyze</text>
+            <text x="330" y="220" font-size="11" fill="#64748b">Capacity & workload</text>
+
+            <text x="330" y="250" font-size="12" fill="#475569" font-weight="500">Prioritize</text>
+            <text x="330" y="270" font-size="11" fill="#64748b">Multi-factor scoring</text>
+
+            <text x="330" y="300" font-size="12" fill="#475569" font-weight="500">Cascade</text>
+            <text x="330" y="320" font-size="11" fill="#64748b">Org priorities → work</text>
+
+            <!-- Arrow 2 to 3 -->
+            <line x1="510" y1="220" x2="570" y2="220" stroke="#cbd5e1" stroke-width="2"/>
+            <polygon points="570,220 560,215 560,225" fill="#cbd5e1"/>
+
+            <!-- STAGE 3: STORE -->
+            <rect x="570" y="80" width="150" height="280" fill="url(#minGrad)" stroke="#cbd5e1" stroke-width="1" rx="4"/>
+            <text x="645" y="110" text-anchor="middle" font-weight="600" font-size="14" fill="#1a1a1a">3. STORE</text>
+
+            <line x1="580" y1="125" x2="710" y2="125" stroke="#e2e8f0" stroke-width="1"/>
+
+            <text x="590" y="160" font-size="12" fill="#475569" font-weight="500">Work Items</text>
+            <text x="590" y="200" font-size="12" fill="#475569" font-weight="500">Priorities</text>
+            <text x="590" y="240" font-size="12" fill="#475569" font-weight="500">Profiles</text>
+            <text x="590" y="280" font-size="12" fill="#475569" font-weight="500">Audit Logs</text>
+
+            <!-- Arrow 3 to 4 -->
+            <line x1="720" y1="220" x2="780" y2="220" stroke="#cbd5e1" stroke-width="2"/>
+            <polygon points="780,220 770,215 770,225" fill="#cbd5e1"/>
+
+            <!-- STAGE 4: OUTPUT -->
+            <rect x="780" y="80" width="200" height="280" fill="url(#minGrad)" stroke="#cbd5e1" stroke-width="1" rx="4"/>
+            <text x="880" y="110" text-anchor="middle" font-weight="600" font-size="14" fill="#1a1a1a">4. OUTPUT</text>
+
+            <line x1="790" y1="125" x2="960" y2="125" stroke="#e2e8f0" stroke-width="1"/>
+
+            <text x="800" y="150" font-size="12" fill="#475569" font-weight="500">Personal Queue</text>
+            <text x="800" y="170" font-size="11" fill="#64748b">(Today, Week, Month)</text>
+
+            <text x="800" y="200" font-size="12" fill="#475569" font-weight="500">Manager Views</text>
+            <text x="800" y="220" font-size="11" fill="#64748b">(Team workload)</text>
+
+            <text x="800" y="250" font-size="12" fill="#475569" font-weight="500">Notifications</text>
+            <text x="800" y="270" font-size="11" fill="#64748b">(Deadlines, alerts)</text>
+
+            <text x="800" y="300" font-size="12" fill="#475569" font-weight="500">Org Dashboard</text>
+            <text x="800" y="320" font-size="11" fill="#64748b">(Strategy alignment)</text>
+
+            <!-- Arrow 4 to 5 -->
+            <line x1="880" y1="365" x2="880" y2="410" stroke="#cbd5e1" stroke-width="2"/>
+            <polygon points="880,410 875,400 885,400" fill="#cbd5e1"/>
+
+            <!-- STAGE 5: CONSUMPTION -->
+            <rect x="730" y="410" width="300" height="60" fill="#ede9fe" stroke="#a78bfa" stroke-width="2" rx="4"/>
+            <text x="880" y="430" text-anchor="middle" font-weight="600" font-size="13" fill="#5b21b6">5. EMPLOYEE ANSWER</text>
+            <text x="880" y="450" text-anchor="middle" font-size="12" fill="#6d28d9">"What should I work on next?" — Clear • Prioritized • Confident</text>
+
+        </svg>
+
+        <div class="description">
+            <h3>Information Flow: 5 Stages</h3>
+
+            <p><strong>Stage 1 — INPUTS:</strong> All signals collected from existing systems (email, chat, calendar, management input, organizational data). No new tools required—reads from systems employees already use.</p>
+
+            <p><strong>Stage 2 — PROCESS:</strong> Intelligent transformation of raw signals into actionable work items. Detects embedded tasks, analyzes available capacity, scores priorities using multiple factors (deadline, authority, impact), cascades organizational priorities down to individual work.</p>
+
+            <p><strong>Stage 3 — STORE:</strong> Centralized state management. Maintains work items, priority rankings, user profiles, and audit logs. Continuously updates as context changes.</p>
+
+            <p><strong>Stage 4 — OUTPUT:</strong> Information delivered to different personas in their preferred format. Employees see personal work queues, managers see team capacity, executives see organizational alignment.</p>
+
+            <p><strong>Stage 5 — CONSUMPTION:</strong> The core value delivered. Employee no longer asks "What should I work on next?" They simply open Prism and see a clear, prioritized answer based on all relevant context.</p>
+
+            <p style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e2e8f0;"><strong>Continuous Learning:</strong> The system improves over time through feedback: user overrides (disagreeing with a priority), manager corrections, and actual behavior (what work gets done, time spent vs. estimated). This feedback trains the prioritization model to become increasingly accurate.</p>
+        </div>
+
+        <div class="flow-steps">
+            <div class="step-box">
+                <div class="step-title">Real-time Sync</div>
+                <div class="step-content">Data collected from email, chat, calendar every 15-30 minutes</div>
+            </div>
+
+            <div class="step-box">
+                <div class="step-title">Continuous Processing</div>
+                <div class="step-content">Prioritization re-evaluated as deadlines approach, capacity changes, or new items arrive</div>
+            </div>
+
+            <div class="step-box">
+                <div class="step-title">Instant Retrieval</div>
+                <div class="step-content">Employee accesses work queue on web, mobile, email, or Slack whenever needed</div>
+            </div>
+
+            <div class="step-box">
+                <div class="step-title">Key Question Answered</div>
+                <div class="step-content">"What should I work on next?" with full context: priorities, deadlines, capacity, dependencies, explanations</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

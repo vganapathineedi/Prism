@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prism Product Architecture - Information Flow</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: #f8f9fa;
+            padding: 40px 20px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            padding: 50px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+
+        h1 {
+            text-align: center;
+            color: #1a1a1a;
+            margin-bottom: 12px;
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 50px;
+            font-size: 16px;
+        }
+
+        svg {
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+            height: auto;
+        }
+
+        .legend {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+            padding-top: 30px;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .legend-color {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .legend-text {
+            font-size: 14px;
+            color: #333;
+            line-height: 1.5;
+        }
+
+        .section-title {
+            font-weight: 600;
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .flow-description {
+            margin-top: 50px;
+            padding: 30px;
+            background: #f9fafb;
+            border-left: 4px solid #4f46e5;
+            border-radius: 4px;
+        }
+
+        .flow-description h3 {
+            color: #1a1a1a;
+            margin-bottom: 15px;
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .flow-description p {
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 12px;
+        }
+
+        .flow-description ul {
+            margin-left: 20px;
+            color: #666;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .flow-description li {
+            margin-bottom: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Prism Product Architecture</h1>
+        <p class="subtitle">Information Flow with Minimal Visual Clutter</p>
+
+        <svg viewBox="0 0 1400 800" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+                <linearGradient id="sourceGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:#dbeafe;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#93c5fd;stop-opacity:1" />
+                </linearGradient>
+                <linearGradient id="processingGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:#fce7f3;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#fbcfe8;stop-opacity:1" />
+                </linearGradient>
+                <linearGradient id="storageGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:#e0e7ff;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#c7d2fe;stop-opacity:1" />
+                </linearGradient>
+                <linearGradient id="outputGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style="stop-color:#dcfce7;stop-opacity:1" />
+                    <stop offset="100%" style="stop-color:#bbf7d0;stop-opacity:1" />
+                </linearGradient>
+
+                <filter id="shadow">
+                    <feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.08"/>
+                </filter>
+
+                <marker id="arrowSmall" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
+                    <polygon points="0 0, 10 3, 0 6" fill="#94a3b8" />
+                </marker>
+            </defs>
+
+            <!-- SECTION HEADERS -->
+            <text x="80" y="30" font-size="12" fill="#666" font-weight="600" letter-spacing="0.5">DATA SOURCES</text>
+            <text x="420" y="30" font-size="12" fill="#666" font-weight="600" letter-spacing="0.5">PROCESSING PIPELINE</text>
+            <text x="880" y="30" font-size="12" fill="#666" font-weight="600" letter-spacing="0.5">OUTPUT & CONSUMPTION</text>
+
+            <!-- VERTICAL SECTION SEPARATORS -->
+            <line x1="350" y1="50" x2="350" y2="700" stroke="#e5e7eb" stroke-width="1"/>
+            <line x1="810" y1="50" x2="810" y2="700" stroke="#e5e7eb" stroke-width="1"/>
+            <line x1="1020" y1="50" x2="1020" y2="700" stroke="#e5e7eb" stroke-width="1"/>
+
+            <!-- SECTION 1: DATA SOURCES -->
+            <!-- Email -->
+            <rect x="20" y="70" width="150" height="90" fill="url(#sourceGrad)" stroke="#60a5fa" stroke-width="2" rx="6" filter="url(#shadow)"/>
+            <text x="95" y="95" text-anchor="middle" font-weight="600" font-size="13" fill="#1e40af">Email</text>
+            <text x="95" y="115" text-anchor="middle" font-size="11" fill="#1e3a8a">(Outlook/Gmail)</text>
+            <text x="95" y="133" text-anchor="middle" font-size="10" fill="#3b82f6">Task detection</text>
+
+            <!-- Chat -->
+            <rect x="190" y="70" width="150" height="90" fill="url(#sourceGrad)" stroke="#60a5fa" stroke-width="2" rx="6" filter="url(#shadow)"/>
+            <text x="265" y="95" text-anchor="middle" font-weight="600" font-size="13" fill="#1e40af">Chat</text>
+            <text x="265" y="115" text-anchor="middle" font-size="11" fill="#1e3a8a">(Slack/Teams)</text>
+            <text x="265" y="133" text-anchor="middle" font-size="10" fill="#3b82f6">Signals</text>
+
+            <!-- Calendar -->
+            <rect x="20" y="190" width="150" height="90" fill="url(#sourceGrad)" stroke="#60a5fa" stroke-width="2" rx="6" filter="url(#shadow)"/>
+            <text x="95" y="215" text-anchor="middle" font-weight="600" font-size="13" fill="#1e40af">Calendar</text>
+            <text x="95" y="235" text-anchor="middle" font-size="11" fill="#1e3a8a">(Outlook/Google)</text>
+            <text x="95" y="253" text-anchor="middle" font-size="10" fill="#3b82f6">Capacity</text>
+
+            <!-- Manager Input -->
+            <rect x="190" y="190" width="150" height="90" fill="url(#sourceGrad)" stroke="#60a5fa" stroke-width="2" rx="6" filter="url(#shadow)"/>
+            <text x="265" y="215" text-anchor="middle" font-weight="600" font-size="13" fill="#1e40af">Manager</text>
+            <text x="265" y="235" text-anchor="middle" font-size="11" fill="#1e3a8a">Input</text>
+            <text x="265" y="253" text-anchor="middle" font-size="10" fill="#3b82f6">Priorities</text>
+
+            <!-- Org Data -->
+            <rect x="20" y="310" width="150" height="90" fill="url(#sourceGrad)" stroke="#60a5fa" stroke-width="2" rx="6" filter="url(#shadow)"/>
+            <text x="95" y="335" text-anchor="middle" font-weight="600" font-size="13" fill="#1e40af">Org Data</text>
+            <text x="95" y="355" text-anchor="middle" font-size="11" fill="#1e3a8a">(Workday)</text>
+            <text x="95" y="373" text-anchor="middle" font-size="10" fill="#3b82f6">Hierarchy</text>
+
+            <!-- Org Priorities -->
+            <rect x="190" y="310" width="150" height="90" fill="url(#sourceGrad)" stroke="#60a5fa" stroke-width="2" rx="6" filter="url(#shadow)"/>
+            <text x="265" y="335" text-anchor="middle" font-weight="600" font-size="13" fill="#1e40af">Org Goals</text>
+            <text x="265" y="355" text-anchor="middle" font-size="11" fill="#1e3a8a">(Leadership)</text>
+            <text x="265" y="373" text-anchor="middle" font-size="10" fill="#3b82f6">Strategy</text>
+
+            <!-- SECTION 2: PROCESSING PIPELINE -->
+            <!-- Aggregation -->
+            <rect x="380" y="70" width="160" height="100" fill="url(#processingGrad)" stroke="#ec4899" stroke-width="2" rx="6" filter="url(#shadow)"/>
+            <text x="460" y="95" text-anchor="middle" font-weight="600" font-size="13" fill="#be185d">Aggregation</text>
+            <text x="460" y="115" text-anchor="middle" font-size="11" fill="#831843">NLP Detection</text>
+            <text x="460" y="133" text-anchor="middle" font-size="10" fill="#ec4899">Deduplication</text>
+
+            <!-- Priority Engine -->
+            <rect x="570" y="70" width="160" height="100" fill="url(#processingGrad)" stroke="#ec4899" stroke-width="2" rx="6" filter="url(#shadow)"/>
+            <text x="650" y="95" text-anchor="middle" font-weight="600" font-size="13" fill="#be185d">Prioritization</text>
+            <text x="650" y="115" text-anchor="middle" font-size="11" fill="#831843">Multi-factor Model</text>
+            <text x="650" y="133" text-anchor="middle" font-size="10" fill="#ec4899">Scoring</text>
+
+            <!-- Capacity Analysis -->
+            <rect x="380" y="200" width="160" height="100" fill="url(#processingGrad)" stroke="#ec4899" stroke-width="2" rx="6" filter="url(#shadow)"/>
+            <text x="460" y="225" text-anchor="middle" font-weight="600" font-size="13" fill="#be185d">Capacity</text>
+            <text x="460" y="245" text-anchor="middle" font-size="11" fill="#831843">Workload Calc</text>
+            <text x="460" y="263" text-anchor="middle" font-size="10" fill="#ec4899">Utilization</text>
+
+            <!-- Dependency Tracking -->
+            <rect x="570" y="200" width="160" height="100" fill="url(#processingGrad)" stroke="#ec4899" stroke-width="2" rx="6" filter="url(#shadow)"/>
+            <text x="650" y="225" text-anchor="middle" font-weight="600" font-size="13" fill="#be185d">Dependencies</text>
+            <text x="650" y="245" text-anchor="middle" font-size="11" fill="#831843">Blocker Detection</text>
+            <text x="650" y="263" text-anchor="middle" font-size="10" fill="#ec4899">Risk Assessment</text>
+
+            <!-- Priority Cascade -->
+            <rect x="380" y="330" width="350" height="90" fill="#fef3c7" stroke="#f59e0b" stroke-width="2" rx="6" filter="url(#shadow)"/>
+            <text x="555" y="358" text-anchor="middle" font-weight="600" font-size="13" fill="#b45309">Priority Cascade Engine</text>
+            <text x="555" y="378" text-anchor="middle" font-size="11" fill="#92400e">Company → BU → Dept → Team → Individual</text>
+
+            <!-- SECTION 3: STORAGE -->
+            <rect x="820" y="120" width="130" height="150" fill="url(#storageGrad)" stroke="#6366f1" stroke-width="2" rx="6" filter="url(#shadow)"/>
+            <text x="885" y="145" text-anchor="middle" font-weight="600" font-size="13" fill="#312e81">Data Store</text>
+            <text x="885" y="170" text-anchor="middle" font-size="11" fill="#3730a3">Work Items</text>
+            <text x="885" y="188" text-anchor="middle" font-size="11" fill="#3730a3">Priorities</text>
+            <text x="885" y="206" text-anchor="middle" font-size="11" fill="#3730a3">Profiles</text>
+            <text x="885" y="224" text-anchor="middle" font-size="10" fill="#6366f1">Audit Logs</text>
+
+            <!-- SECTION 4: OUTPUT & CONSUMPTION -->
+            <!-- Personal Queue -->
+            <rect x="1050" y="70" width="150" height="100" fill="url(#outputGrad)" stroke="#22c55e" stroke-width="2" rx="6" filter="url(#shadow)"/>
+            <text x="1125" y="95" text-anchor="middle" font-weight="600" font-size="13" fill="#15803d">Personal Queue</text>
+            <text x="1125" y="117" text-anchor="middle" font-size="10" fill="#166534">Today • Week</text>
+            <text x="1125" y="133" text-anchor="middle" font-size="10" fill="#166534">Month • Later</text>
+
+            <!-- Manager Views -->
+            <rect x="1220" y="70" width="150" height="100" fill="url(#outputGrad)" stroke="#22c55e" stroke-width="2" rx="6" filter="url(#shadow)"/>
+            <text x="1295" y="95" text-anchor="middle" font-weight="600" font-size="13" fill="#15803d">Manager Views</text>
+            <text x="1295" y="117" text-anchor="middle" font-size="10" fill="#166534">Team Capacity</text>
+            <text x="1295" y="133" text-anchor="middle" font-size="10" fill="#166534">Blockers & Risk</text>
+
+            <!-- Notifications -->
+            <rect x="1050" y="200" width="150" height="100" fill="url(#outputGrad)" stroke="#22c55e" stroke-width="2" rx="6" filter="url(#shadow)"/>
+            <text x="1125" y="225" text-anchor="middle" font-weight="600" font-size="13" fill="#15803d">Notifications</text>
+            <text x="1125" y="247" text-anchor="middle" font-size="10" fill="#166534">Deadline Alerts</text>
+            <text x="1125" y="263" text-anchor="middle" font-size="10" fill="#166534">Overallocation</text>
+
+            <!-- Org Dashboard -->
+            <rect x="1220" y="200" width="150" height="100" fill="url(#outputGrad)" stroke="#22c55e" stroke-width="2" rx="6" filter="url(#shadow)"/>
+            <text x="1295" y="225" text-anchor="middle" font-weight="600" font-size="13" fill="#15803d">Org Dashboard</text>
+            <text x="1295" y="247" text-anchor="middle" font-size="10" fill="#166534">Strategy Alignment</text>
+            <text x="1295" y="263" text-anchor="middle" font-size="10" fill="#166534">Focus Metrics</text>
+
+            <!-- CONSUMPTION BOX (Bottom) -->
+            <rect x="1050" y="340" width="320" height="160" fill="#f3e8ff" stroke="#a855f7" stroke-width="2" rx="6" filter="url(#shadow)"/>
+            <text x="1210" y="365" text-anchor="middle" font-weight="600" font-size="13" fill="#6b21a8">EMPLOYEE</text>
+            <text x="1210" y="382" text-anchor="middle" font-weight="600" font-size="13" fill="#6b21a8">CONSUMPTION</text>
+
+            <text x="1065" y="405" font-size="9" fill="#6b21a8" font-weight="500">Channels:</text>
+            <text x="1065" y="417" font-size="9" fill="#7e22ce">Web • Mobile • Slack • Email</text>
+
+            <text x="1065" y="434" font-size="9" fill="#6b21a8" font-weight="500">Answer:</text>
+            <text x="1065" y="446" font-size="9" fill="#7e22ce">"What to do next?"</text>
+
+            <text x="1065" y="463" font-size="9" fill="#6b21a8" font-weight="500">With:</text>
+            <text x="1065" y="475" font-size="9" fill="#7e22ce">Priority • Deadline • Capacity</text>
+
+            <!-- ARROW: Outputs to Consumption -->
+            <path d="M 1210 300 L 1210 335" stroke="#94a3b8" stroke-width="2" fill="none" marker-end="url(#arrowSmall)"/>
+
+            <!-- TIMING INDICATORS -->
+            <text x="80" y="750" font-size="11" fill="#64748b" font-weight="500">Real-time Sync</text>
+            <text x="80" y="765" font-size="10" fill="#94a3b8">(15-30 min)</text>
+
+            <text x="450" y="750" font-size="11" fill="#64748b" font-weight="500">Continuous Processing</text>
+            <text x="450" y="765" font-size="10" fill="#94a3b8">(on demand)</text>
+
+            <text x="900" y="750" font-size="11" fill="#64748b" font-weight="500">Instant Retrieval</text>
+            <text x="900" y="765" font-size="10" fill="#94a3b8">(cached)</text>
+
+            <text x="1250" y="750" font-size="11" fill="#64748b" font-weight="500">Throughout Day</text>
+            <text x="1250" y="765" font-size="10" fill="#94a3b8">(web/mobile)</text>
+        </svg>
+
+        <div class="legend">
+            <div>
+                <div class="section-title">Data Sources</div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #93c5fd;"></div>
+                    <div class="legend-text">Multiple input signals: email, chat, calendar, manager priorities, organizational hierarchy and goals</div>
+                </div>
+            </div>
+
+            <div>
+                <div class="section-title">Processing Pipeline</div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #fbcfe8;"></div>
+                    <div class="legend-text">Intelligent transformation: aggregation, prioritization, capacity analysis, dependency tracking, and priority cascading</div>
+                </div>
+            </div>
+
+            <div>
+                <div class="section-title">Storage</div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #c7d2fe;"></div>
+                    <div class="legend-text">Centralized state: work items, priorities, user profiles, and audit logs for transparency and learning</div>
+                </div>
+            </div>
+
+            <div>
+                <div class="section-title">Output & Consumption</div>
+                <div class="legend-item">
+                    <div class="legend-color" style="background: #bbf7d0;"></div>
+                    <div class="legend-text">Information delivered to employees, managers, and leaders in their preferred format and channels</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flow-description">
+            <h3>Information Flow Overview</h3>
+
+            <p><strong>Stage 1 — Data Sources:</strong> All non-project work signals collected from existing enterprise systems. No new tools required—Prism integrates with email, chat, calendar, and organizational systems employees already use daily.</p>
+
+            <p><strong>Stage 2 — Processing Pipeline:</strong> Multi-stage intelligent processing transforms fragmented signals into actionable work items. Includes NLP task detection, multi-factor prioritization (deadline + authority + impact + capacity), workload analysis, dependency tracking, and cascade of organizational priorities to individual work.</p>
+
+            <p><strong>Stage 3 — Storage:</strong> Centralized data store maintains work items, priority rankings, user profiles, and complete audit logs. State continuously updates as context changes (deadlines approach, capacity changes, dependencies resolve).</p>
+
+            <p><strong>Stage 4 — Output & Consumption:</strong> Information delivered to different personas through their preferred channels. Employees see personal prioritized queues, managers see team workload and capacity constraints, leaders see organizational alignment to strategy. All accessible via web, mobile, Slack, or email.</p>
+
+            <p style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e2e8f0;"><strong>Continuous Learning:</strong> The system improves over time through feedback: user overrides (disagreeing with priorities), manager corrections, and actual completion behavior. This data trains the prioritization model to become increasingly accurate.</p>
+        </div>
+    </div>
+</body>
+</html>
