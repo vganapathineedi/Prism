@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prism - Intelligent Work Prioritization Platform</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .work-item { cursor: pointer; border-radius: 8px; padding: 16px; margin-bottom: 12px; background: white; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .work-item:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.15); transform: translateY(-2px); }
+        .priority-high { border-left: 4px solid #ef4444; background: linear-gradient(90deg, rgba(239,68,68,0.05) 0%, transparent 100%); }
+        .priority-medium { border-left: 4px solid #f59e0b; background: linear-gradient(90deg, rgba(245,158,11,0.05) 0%, transparent 100%); }
+        .priority-low { border-left: 4px solid #3b82f6; background: linear-gradient(90deg, rgba(59,130,246,0.05) 0%, transparent 100%); }
+        .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-right: 8px; margin-bottom: 8px; }
+        .explanation { background-color: #f0f9ff; border-left: 3px solid #3b82f6; padding: 12px; margin-top: 8px; border-radius: 4px; font-size: 13px; color: #1e40af; line-height: 1.5; display: none; }
+        .work-item:hover .explanation { display: block; }
+        .info-icon { display: inline-block; width: 18px; height: 18px; background: #3b82f6; color: white; border-radius: 50%; text-align: center; line-height: 18px; font-size: 12px; font-weight: bold; cursor: help; margin-left: 4px; }
+        .tooltip { position: relative; display: inline-block; }
+        .tooltiptext { visibility: hidden; width: 280px; background-color: #1f2937; color: #f3f4f6; text-align: left; border-radius: 8px; padding: 12px; position: absolute; z-index: 1000; bottom: 125%; left: 50%; margin-left: -140px; opacity: 0; font-size: 13px; line-height: 1.5; border: 1px solid #4b5563; box-shadow: 0 4px 12px rgba(0,0,0,0.3); transition: opacity 0.3s; }
+        .tooltip:hover .tooltiptext { visibility: visible; opacity: 1; }
+        .tooltiptext::after { content: ""; position: absolute; top: 100%; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: #1f2937 transparent transparent transparent; }
+        .tab-button { padding: 12px 24px; border-bottom: 2px solid transparent; color: #6b7280; cursor: pointer; font-weight: 500; }
+        .tab-button.active { border-bottom-color: #3b82f6; color: #3b82f6; }
+        .metric-card { background: white; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); text-align: center; }
+        .metric-value { font-size: 32px; font-weight: bold; color: #3b82f6; margin: 10px 0; }
+        .metric-label { color: #6b7280; font-size: 14px; }
+        .toggle-section { background: none !important; border: none !important; font-size: 24px !important; cursor: pointer !important; width: 32px !important; height: 32px !important; display: inline-flex !important; align-items: center !important; justify-content: center !important; padding: 0 !important; line-height: 32px !important; flex-shrink: 0; vertical-align: middle; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="app"></div>
+
+    <script>
+        class PrismDemo {
+            constructor() {
+                this.currentTab = 'dashboard';
+                this.currentPersona = 'sarah-chen-individual';
+                this.personaToUser = {
+                    'sarah-chen-individual': 'sarah-chen',
+                    'alex-torres-individual': 'alex-torres',
+                    'alex-torres-manager': 'alex-torres',
+                    'jennifer-lee-individual': 'jennifer-lee',
+                    'jennifer-lee-executive': 'jennifer-lee'
+                };
+                this.workItems = this.initializeWorkItems();
+                this.teamPriorities = { 1: 'high', 2: 'medium', 3: 'high', 4: 'medium' };
+                this.expandedMember = null;
+                this.expandedSections = {
+                    myWork: false,
+                    myQueue: false,
+                    howPrismWorks: false,
+                    teamCapacity: false,
+                    teamMembers: false,
+                    teamWorkload: false,
+                    teamBacklog: false,
+                    teamPriorities: false,
+                    mySources: false,
+                    myCapacity: false
+                };
+                this.teamBacklog = [];
+                this.memberTasks = {
+                    1: [
+                        { id: 101, title: 'API review for migration', priority: 'high', hours: 1.5, order: 1 },
+                        { id: 102, title: 'Customer retention dashboard', priority: 'high', hours: 8, order: 2 },
+                        { id: 103, title: 'Code review improvements', priority: 'medium', hours: 5, order: 3 }
+                    ],
+                    2: [
+                        { id: 201, title: 'Documentation update', priority: 'medium', hours: 3, order: 1 },
+                        { id: 202, title: 'Code review participation', priority: 'medium', hours: 4, order: 2 },
+                        { id: 203, title: 'Testing & QA', priority: 'low', hours: 3, order: 3 }
+                    ],
+                    3: [
+                        { id: 301, title: 'UI implementation', priority: 'high', hours: 6, order: 1 },
+                        { id: 302, title: 'Retention dashboard UI', priority: 'high', hours: 8, order: 2 },
+                        { id: 303, title: 'Performance optimization', priority: 'medium', hours: 4, order: 3 }
+                    ],
+                    4: [
+                        { id: 401, title: 'API documentation', priority: 'medium', hours: 2, order: 1 },
+                        { id: 402, title: 'Code review', priority: 'medium', hours: 3, order: 2 },
+                        { id: 403, title: 'Technical debt reduction', priority: 'low', hours: 2, order: 3 }
+                    ],
+                    manager: [
+                        { id: 501, title: 'Team capacity assessment for Q4 roadmap', priority: 'high', hours: 3, order: 1 },
+                        { id: 502, title: 'Code review velocity improvement (lead)', priority: 'high', hours: 5, order: 2 },
+                        { id: 503, title: 'Customer retention dashboard design review', priority: 'medium', hours: 2, order: 3 },
+                        { id: 504, title: 'Team 1:1 sync meetings', priority: 'medium', hours: 5, order: 4 },
+                        { id: 505, title: 'Performance reviews prep', priority: 'low', hours: 4, order: 5 }
+                    ]
+                };
+                this.setupEventDelegation();
+                this.render();
+            }
+
+            initializeWorkItems() {
+                return {
+                    'sarah-chen': {
+                        individual: [
+                            { id: 1, title: 'Review proposal feedback from VP Marketing', description: 'VP needs feedback on Q4 marketing strategy proposal', priority: 'high', source: 'email', deadline: 'Today', estimatedHours: 2, impact: 'Strategic alignment with marketing' },
+                            { id: 2, title: 'Complete code review for API migration', description: 'Review pull request for microservices refactor', priority: 'high', source: 'slack', deadline: 'Today', estimatedHours: 1.5, impact: 'Unblocks team on critical path' },
+                            { id: 3, title: 'Improve code review velocity (Manager Priority)', description: 'Engineering team initiative to reduce PR review time', priority: 'high', source: 'manager', deadline: 'This Week', estimatedHours: 5, impact: 'Team productivity initiative' },
+                            { id: 4, title: 'Customer retention dashboard implementation', description: 'Build dashboard for tracking customer health metrics', priority: 'medium', source: 'org', deadline: 'Next Week', estimatedHours: 8, impact: 'Organizational priority: Customer Retention' },
+                            { id: 5, title: 'Update documentation for new API endpoints', description: 'Write API documentation for v2 endpoints', priority: 'medium', source: 'slack', deadline: 'Next Week', estimatedHours: 3, impact: 'Supports developer experience' },
+                            { id: 6, title: 'Follow up on onboarding feedback', description: 'Connect with new team member on first week experience', priority: 'low', source: 'email', deadline: 'Next Week', estimatedHours: 0.5, impact: 'Team culture and retention' }
+                        ]
+                    },
+                    'alex-torres': {
+                        individual: [
+                            { id: 1, title: 'Weekly 1:1 sync with direct reports', description: 'Conduct one-on-one meetings with team members to discuss progress and blockers', priority: 'high', source: 'calendar', deadline: 'Today', estimatedHours: 3, impact: 'Team alignment and development' },
+                            { id: 2, title: 'Code review velocity improvement initiative', description: 'Lead team effort to reduce PR review time by 25%', priority: 'high', source: 'manager', deadline: 'This Week', estimatedHours: 5, impact: 'Team productivity improvement' },
+                            { id: 3, title: 'Quarterly performance planning', description: 'Prepare for upcoming performance reviews and development conversations', priority: 'high', source: 'manager', deadline: 'Next Week', estimatedHours: 4, impact: 'Team development and retention' },
+                            { id: 4, title: 'Budget planning for Q4', description: 'Review team headcount and resource allocation for next quarter', priority: 'medium', source: 'email', deadline: 'Next Week', estimatedHours: 3, impact: 'Resource planning' },
+                            { id: 5, title: 'Architecture review for retention dashboard', description: 'Review technical approach with engineering team', priority: 'medium', source: 'slack', deadline: 'This Week', estimatedHours: 2, impact: 'Technical alignment' }
+                        ],
+                        manager: [
+                            { id: 1, name: 'Sarah Chen', role: 'Senior Engineer', committed: 14.5, available: 40, priority: 'high', status: 'healthy', items: ['API review', 'Retention dashboard', 'Code review improvements'] },
+                            { id: 2, name: 'Alex Rodriguez', role: 'Software Engineer', committed: 10, available: 40, priority: 'medium', status: 'healthy', items: ['Documentation update', 'Code review', 'Testing'] },
+                            { id: 3, name: 'Jordan Kim', role: 'Frontend Engineer', committed: 18, available: 40, priority: 'high', status: 'near-full', items: ['UI implementation', 'Retention dashboard', 'Performance work'] },
+                            { id: 4, name: 'Casey Patel', role: 'Software Engineer', committed: 7, available: 40, priority: 'medium', status: 'healthy', items: ['Documentation', 'Code review', 'Tech debt'] }
+                        ]
+                    },
+                    'alex-rodriguez': {
+                        individual: [
+                            { id: 1, title: 'Documentation update', description: 'Update API documentation for microservices endpoints', priority: 'medium', source: 'slack', deadline: 'Today', estimatedHours: 3, impact: 'Developer experience' },
+                            { id: 2, title: 'Code review participation', description: 'Review pending pull requests from team members', priority: 'medium', source: 'slack', deadline: 'Today', estimatedHours: 4, impact: 'Code quality and knowledge sharing' },
+                            { id: 3, title: 'Testing & QA', description: 'Execute test cases for customer retention dashboard', priority: 'low', source: 'manager', deadline: 'This Week', estimatedHours: 3, impact: 'Quality assurance' }
+                        ]
+                    },
+                    'jordan-kim': {
+                        individual: [
+                            { id: 1, title: 'UI implementation', description: 'Build retention dashboard frontend components', priority: 'high', source: 'manager', deadline: 'Today', estimatedHours: 6, impact: 'Critical path delivery' },
+                            { id: 2, title: 'Retention dashboard UI', description: 'Design and implement dashboard layout and styling', priority: 'high', source: 'org', deadline: 'This Week', estimatedHours: 8, impact: 'Organizational priority' },
+                            { id: 3, title: 'Performance optimization', description: 'Optimize rendering performance for complex data visualizations', priority: 'medium', source: 'slack', deadline: 'Next Week', estimatedHours: 4, impact: 'User experience' }
+                        ]
+                    },
+                    'casey-patel': {
+                        individual: [
+                            { id: 1, title: 'API documentation', description: 'Document new REST API endpoints and usage examples', priority: 'medium', source: 'email', deadline: 'Today', estimatedHours: 2, impact: 'API usability' },
+                            { id: 2, title: 'Code review', description: 'Review code changes for architectural alignment', priority: 'medium', source: 'slack', deadline: 'Today', estimatedHours: 3, impact: 'Code quality' },
+                            { id: 3, title: 'Technical debt reduction', description: 'Refactor legacy authentication module', priority: 'low', source: 'manager', deadline: 'Next Week', estimatedHours: 2, impact: 'System reliability' }
+                        ]
+                    },
+                    'jennifer-lee': {
+                        individual: [
+                            { id: 1, title: 'Review Q4 roadmap alignment with product', description: 'Align engineering priorities with product and business strategy', priority: 'high', source: 'email', deadline: 'Today', estimatedHours: 4, impact: 'Strategic alignment' },
+                            { id: 2, title: 'Customer retention initiative oversight', description: 'Monitor progress on $2M revenue opportunity initiative', priority: 'high', source: 'org', deadline: 'This Week', estimatedHours: 3, impact: 'Revenue impact: $2M potential' },
+                            { id: 3, title: 'Board presentation prep - Engineering metrics', description: 'Prepare metrics and narrative for quarterly board update', priority: 'high', source: 'calendar', deadline: 'Next Week', estimatedHours: 6, impact: 'Board communication' },
+                            { id: 4, title: 'Compliance audit planning', description: 'Coordinate SOC2 audit scope and timeline for Q1 2025', priority: 'high', source: 'manager', deadline: 'Next Week', estimatedHours: 3, impact: 'Enables enterprise sales' },
+                            { id: 5, title: 'Engineering hiring strategy review', description: 'Review talent acquisition plan for year-end hiring', priority: 'medium', source: 'email', deadline: 'Next Week', estimatedHours: 2, impact: 'Team growth' }
+                        ],
+                        executive: [
+                            { id: 1, title: 'Customer Retention Initiative - Organizational Priority', description: 'Drive adoption of customer health dashboard across teams', priority: 'high', source: 'org', deadline: 'Q4 2024', estimatedHours: 40, impact: 'Revenue impact: $2M potential' },
+                            { id: 2, title: 'Engineering velocity improvement', description: 'Reduce PR review time, improve deployment frequency', priority: 'high', source: 'org', deadline: 'This Quarter', estimatedHours: 20, impact: 'Improves team productivity 15-20%' },
+                            { id: 3, title: 'Compliance and SOC2 audit preparation', description: 'Coordinate security audit across organization', priority: 'high', source: 'manager', deadline: 'Q1 2025', estimatedHours: 30, impact: 'Enables enterprise sales' }
+                        ]
+                    }
+                };
+            }
+
+            getItemExplanation(item) {
+                const user = this.personaToUser[this.currentPersona];
+                const role = this.currentPersona.endsWith('-manager') ? 'manager' : this.currentPersona.endsWith('-executive') ? 'executive' : 'individual';
+                const exp = {
+                    'sarah-chen-individual': {
+                        1: 'VP request = high stakeholder impact. Strategic visibility & decision-making quality.',
+                        2: 'Blocks team progress. Unblocking others compounds your impact.',
+                        3: 'Manager priority signals organizational focus. Improves team velocity.',
+                        4: 'Org priority with long timeline. Sequence after urgent items.',
+                        5: 'Supports team productivity & adoption. Schedule for this week.',
+                        6: 'Team culture matters for retention. Low effort, high relationship value.'
+                    },
+                    'alex-torres-individual': {
+                        1: 'Direct reports need regular feedback and support.',
+                        2: 'Team velocity directly impacts deliverables and morale.',
+                        3: 'Development conversations improve retention and career growth.',
+                        4: 'Resource planning ensures team has what they need to succeed.',
+                        5: 'Technical alignment prevents rework and delays.'
+                    },
+                    'alex-torres-manager': {
+                        1: 'Team capacity planning ensures deliverables meet timeline.',
+                        2: 'Velocity improvement scales throughput and improves morale.',
+                        3: 'Workload management prevents burnout and supports retention.'
+                    },
+                    'jennifer-lee-individual': {
+                        1: 'Organizational alignment ensures engineering supports business strategy.',
+                        2: 'Major initiative oversight ensures execution and ROI.',
+                        3: 'Board communication demonstrates value and progress to leadership.',
+                        4: 'Compliance enables new market opportunities.',
+                        5: 'Talent strategy supports long-term team growth.'
+                    },
+                    'jennifer-lee-executive': {
+                        1: '$2M revenue opportunity. Direct impact on company growth targets.',
+                        2: 'Improves team throughput & enables faster feature delivery.',
+                        3: 'Required for enterprise sales. Enables new market segment ($5M+ TAM).'
+                    }
+                };
+                const key = `${user}-${role}`;
+                return (exp[key] && exp[key][item.id]) || item.impact;
+            }
+
+            getMetricExplanation(type) {
+                const exp = {
+                    'sarah-chen-individual': {
+                        items: 'Shows your complete work queue. Higher numbers need better prioritization.',
+                        hours: 'Helps you understand total commitment vs. available time (40h/week).',
+                        sources: 'Visibility into signal diversity. More sources = higher context-switching.'
+                    },
+                    'alex-torres-individual': {
+                        items: 'Your personal workload as a manager. Balance leadership with execution.',
+                        hours: 'Your commitment vs. available time (50h/week for managers).',
+                        sources: 'Work from team, executives, and direct responsibilities.'
+                    },
+                    'alex-torres-manager': {
+                        items: 'Team members at full/over capacity. Helps identify who needs support.',
+                        hours: 'Total team committed hours vs. available capacity. Informs resource planning.',
+                        sources: 'Work flowing from all channels. Visibility into informal commitments.'
+                    },
+                    'jennifer-lee-individual': {
+                        items: 'Your executive-level personal work. Strategic focus.',
+                        hours: 'Your commitment vs. available time (40h/week).',
+                        sources: 'Strategic and operational priorities.'
+                    },
+                    'jennifer-lee-executive': {
+                        items: 'Organizational work volume. Baseline for capacity planning.',
+                        hours: 'Total org commitment. Benchmark against strategic goals.',
+                        sources: 'Strategic priorities cascade through all channels.'
+                    }
+                };
+                const user = this.personaToUser[this.currentPersona];
+                const role = this.currentPersona.endsWith('-manager') ? 'manager' : this.currentPersona.endsWith('-executive') ? 'executive' : 'individual';
+                const key = `${user}-${role}`;
+                return (exp[key] && exp[key][type]) || '';
+            }
+
+            setupEventDelegation() {
+                document.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('tab-button')) {
+                        this.currentTab = e.target.dataset.tab;
+                        this.render();
+                    }
+                    if (e.target.classList.contains('toggle-section')) {
+                        const sectionName = e.target.dataset.section;
+                        this.expandedSections[sectionName] = !this.expandedSections[sectionName];
+                        this.render();
+                    }
+                    if (e.target.classList.contains('expand-member')) {
+                        const memberId = parseInt(e.target.dataset.memberId);
+                        this.expandedMember = this.expandedMember === memberId ? null : memberId;
+                        this.render();
+                    }
+                    if (e.target.classList.contains('priority-toggle')) {
+                        const memberId = e.target.dataset.memberId;
+                        const currentPriority = this.teamPriorities[memberId];
+                        const priorities = ['high', 'medium', 'low'];
+                        const currentIndex = priorities.indexOf(currentPriority);
+                        const nextPriority = priorities[(currentIndex + 1) % priorities.length];
+                        this.teamPriorities[memberId] = nextPriority;
+                        this.render();
+                    }
+                    if (e.target.classList.contains('task-priority-toggle')) {
+                        const memberId = parseInt(e.target.dataset.memberId);
+                        const taskId = parseInt(e.target.dataset.taskId);
+                        const tasks = this.memberTasks[memberId];
+                        const task = tasks.find(t => t.id === taskId);
+                        if (task) {
+                            const priorities = ['high', 'medium', 'low'];
+                            const currentIndex = priorities.indexOf(task.priority);
+                            task.priority = priorities[(currentIndex + 1) % priorities.length];
+                            this.render();
+                        }
+                    }
+                    if (e.target.classList.contains('move-task-up')) {
+                        const memberId = parseInt(e.target.dataset.memberId);
+                        const taskId = parseInt(e.target.dataset.taskId);
+                        const tasks = this.memberTasks[memberId];
+                        const idx = tasks.findIndex(t => t.id === taskId);
+                        if (idx > 0) {
+                            [tasks[idx], tasks[idx - 1]] = [tasks[idx - 1], tasks[idx]];
+                            this.render();
+                        }
+                    }
+                    if (e.target.classList.contains('move-task-down')) {
+                        const memberId = parseInt(e.target.dataset.memberId);
+                        const taskId = parseInt(e.target.dataset.taskId);
+                        const tasks = this.memberTasks[memberId];
+                        const idx = tasks.findIndex(t => t.id === taskId);
+                        if (idx < tasks.length - 1) {
+                            [tasks[idx], tasks[idx + 1]] = [tasks[idx + 1], tasks[idx]];
+                            this.render();
+                        }
+                    }
+                    if (e.target.classList.contains('defer-task')) {
+                        const memberId = parseInt(e.target.dataset.memberId);
+                        const taskId = parseInt(e.target.dataset.taskId);
+                        const tasks = this.memberTasks[memberId];
+                        const taskIdx = tasks.findIndex(t => t.id === taskId);
+                        if (taskIdx !== -1) {
+                            const task = tasks[taskIdx];
+                            this.teamBacklog.push({
+                                ...task,
+                                originalMemberId: memberId,
+                                originalMemberName: this.workItems.manager.find(m => m.id === memberId).name,
+                                deferredAt: new Date().toLocaleDateString()
+                            });
+                            tasks.splice(taskIdx, 1);
+                            this.render();
+                        }
+                    }
+                    if (e.target.classList.contains('reassign-task')) {
+                        const taskId = parseInt(e.target.dataset.taskId);
+                        const newMemberId = parseInt(e.target.dataset.newMemberId);
+                        const backlogIdx = this.teamBacklog.findIndex(t => t.id === taskId);
+                        if (backlogIdx !== -1) {
+                            const task = this.teamBacklog[backlogIdx];
+                            const { originalMemberId, originalMemberName, deferredAt, ...taskData } = task;
+                            this.memberTasks[newMemberId].push(taskData);
+                            this.teamBacklog.splice(backlogIdx, 1);
+                            this.render();
+                        }
+                    }
+                    if (e.target.classList.contains('return-task')) {
+                        const taskId = parseInt(e.target.dataset.taskId);
+                        const backlogIdx = this.teamBacklog.findIndex(t => t.id === taskId);
+                        if (backlogIdx !== -1) {
+                            const task = this.teamBacklog[backlogIdx];
+                            const memberId = task.originalMemberId;
+                            const { originalMemberId: _, originalMemberName: __, deferredAt: ___, ...taskData } = task;
+                            this.memberTasks[memberId].push(taskData);
+                            this.teamBacklog.splice(backlogIdx, 1);
+                            this.render();
+                        }
+                    }
+                });
+                document.addEventListener('change', (e) => {
+                    if (e.target.id === 'personaSelect') {
+                        this.currentPersona = e.target.value;
+                        this.render();
+                    }
+                });
+            }
+
+            render() {
+                const app = document.getElementById('app');
+                let content = '';
+
+                if (this.currentTab === 'dashboard') {
+                    content = this.renderDashboard();
+                } else if (this.currentTab === 'queue') {
+                    content = this.renderQueue();
+                } else if (this.currentTab === 'sources') {
+                    content = this.renderSources();
+                } else if (this.currentTab === 'capacity') {
+                    content = this.renderCapacity();
+                }
+
+                app.innerHTML = this.renderHeader() + this.renderTabs() + content + '<div class="bg-gray-900 text-white py-8 mt-12"><div class="max-w-7xl mx-auto px-4 text-center"><p class="text-gray-400">This is a prototype demonstrating Prism concepts</p></div></div>';
+            }
+
+            renderHeader() {
+                const userNames = {
+                    'sarah-chen-individual': 'Sarah Chen',
+                    'alex-torres-individual': 'Alex Torres',
+                    'alex-torres-manager': 'Alex Torres',
+                    'jennifer-lee-individual': 'Jennifer Lee',
+                    'jennifer-lee-executive': 'Jennifer Lee'
+                };
+                const personaEmojis = {
+                    'sarah-chen-individual': '👤',
+                    'alex-torres-individual': '👤',
+                    'alex-torres-manager': '👥',
+                    'jennifer-lee-individual': '👤',
+                    'jennifer-lee-executive': '🎯'
+                };
+                const currentName = userNames[this.currentPersona];
+                const currentEmoji = personaEmojis[this.currentPersona];
+
+                return `<div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                    <div class="max-w-7xl mx-auto px-4 py-16">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <div>
+                                <h1 style="font-size: 48px; font-weight: bold; margin-bottom: 8px;">Prism</h1>
+                                <p style="font-size: 20px; opacity: 0.9;">Intelligent Work Prioritization Platform</p>
+                                <p style="font-size: 14px; opacity: 0.75; margin-top: 8px;">Transforms fragmented work signals into a clear, prioritized work queue</p>
+                                <div style="margin-top: 16px; padding: 12px 16px; background: rgba(255,255,255,0.15); border-radius: 8px; display: inline-block; font-size: 16px; font-weight: 600;">
+                                    ${currentEmoji} Logged in as: <strong>${currentName}</strong>
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 14px; opacity: 0.75;">Switch Role:</div>
+                                <select id="personaSelect" style="margin-top: 8px; padding: 8px 16px; background: white; color: #667eea; border-radius: 8px; font-weight: bold; cursor: pointer;">
+                                    <option value="sarah-chen-individual" ${this.currentPersona === 'sarah-chen-individual' ? 'selected' : ''}>👤 Sarah Chen (Engineer)</option>
+                                    <option value="alex-torres-manager" ${this.currentPersona === 'alex-torres-manager' ? 'selected' : ''}>👥 Alex Torres (Engineering Manager)</option>
+                                    <option value="jennifer-lee-executive" ${this.currentPersona === 'jennifer-lee-executive' ? 'selected' : ''}>🎯 Jennifer Lee (VP Engineering)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            }
+
+            renderTabs() {
+                return `<div style="border-bottom: 1px solid #e5e7eb; background: white;">
+                    <div class="max-w-7xl mx-auto px-4">
+                        <button class="tab-button ${this.currentTab === 'dashboard' ? 'active' : ''}" data-tab="dashboard">📊 My Dashboard</button>
+                        <button class="tab-button ${this.currentTab === 'queue' ? 'active' : ''}" data-tab="queue">📋 My Queue</button>
+                        <button class="tab-button ${this.currentTab === 'sources' ? 'active' : ''}" data-tab="sources">🔄 Sources</button>
+                        <button class="tab-button ${this.currentTab === 'capacity' ? 'active' : ''}" data-tab="capacity">📈 My Capacity</button>
+                    </div>
+                </div>`;
+            }
+
+            renderDashboard() {
+                if (this.currentPersona.endsWith('-manager')) {
+                    return this.renderManagerDashboard();
+                }
+
+                const user = this.personaToUser[this.currentPersona];
+                const role = this.currentPersona.endsWith('-executive') ? 'executive' : 'individual';
+                const items = this.workItems[user][role];
+                const highPriority = items.filter(i => i.priority === 'high').length;
+                const totalHours = items.reduce((sum, i) => sum + i.estimatedHours, 0);
+
+                return `<div class="max-w-7xl mx-auto px-4 py-12">
+                    <div style="display: grid; grid-template-columns: 1fr auto; align-items: center; justify-items: end; margin-bottom: 24px; cursor: pointer; gap: 16px;">
+                        <h2 style="font-size: 24px; font-weight: bold; margin: 0; justify-self: start;">📊 My Work Summary</h2>
+                        <button class="toggle-section" data-section="myWork" style="background: none; border: none; font-size: 24px; cursor: pointer; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; padding: 0; line-height: 1;">
+                            ${this.expandedSections.myWork ? '▼' : '▶'}
+                        </button>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 48px; ${this.expandedSections.myWork ? 'display: grid;' : 'display: none;'}">
+                        <div class="metric-card tooltip">
+                            <div class="metric-label">My Items <span class="info-icon">?</span></div>
+                            <div class="metric-value">${items.length}</div>
+                            <div style="font-size: 14px; color: #6b7280; margin-top: 8px;">${highPriority} high priority</div>
+                            <div class="tooltiptext">${this.getMetricExplanation('items')}</div>
+                        </div>
+                        <div class="metric-card tooltip">
+                            <div class="metric-label">My Committed Hours <span class="info-icon">?</span></div>
+                            <div class="metric-value">${totalHours}</div>
+                            <div style="font-size: 14px; color: #6b7280; margin-top: 8px;">across all priorities</div>
+                            <div class="tooltiptext">${this.getMetricExplanation('hours')}</div>
+                        </div>
+                        <div class="metric-card tooltip">
+                            <div class="metric-label">Work Sources <span class="info-icon">?</span></div>
+                            <div class="metric-value">4</div>
+                            <div style="font-size: 14px; color: #6b7280; margin-top: 8px;">Email, Slack, Manager, Org</div>
+                            <div class="tooltiptext">${this.getMetricExplanation('sources')}</div>
+                        </div>
+                    </div>
+                    <div style="margin-bottom: 32px;">
+                        <div style="display: grid; grid-template-columns: 1fr auto; align-items: center; justify-items: end; margin-bottom: 16px; cursor: pointer; gap: 16px;">
+                            <h2 style="font-size: 24px; font-weight: bold; margin: 0; justify-self: start;">💡 How Prism Works</h2>
+                            <button class="toggle-section" data-section="howPrismWorks" style="background: none; border: none; font-size: 24px; cursor: pointer; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; padding: 0; line-height: 1;">
+                                ${this.expandedSections.howPrismWorks ? '▼' : '▶'}
+                            </button>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; ${this.expandedSections.howPrismWorks ? 'display: grid;' : 'display: none;'}">
+                            <div style="text-align: center;"><div style="font-size: 32px; margin-bottom: 8px;">📧</div><div style="font-weight: 600;">Aggregate</div></div>
+                            <div style="text-align: center;"><div style="font-size: 32px; margin-bottom: 8px;">🔍</div><div style="font-weight: 600;">Analyze</div></div>
+                            <div style="text-align: center;"><div style="font-size: 32px; margin-bottom: 8px;">⚖️</div><div style="font-weight: 600;">Prioritize</div></div>
+                            <div style="text-align: center;"><div style="font-size: 32px; margin-bottom: 8px;">✅</div><div style="font-weight: 600;">Execute</div></div>
+                        </div>
+                    </div>
+                </div>`;
+            }
+
+            renderManagerDashboard() {
+                const teamMembers = this.workItems['alex-torres'].manager;
+                const managerItems = this.workItems['alex-torres'].individual;
+                const self = this;
+
+                // Map member IDs to person keys for task lookup
+                const memberToPerson = {
+                    1: 'sarah-chen',
+                    2: 'alex-rodriguez',
+                    3: 'jordan-kim',
+                    4: 'casey-patel'
+                };
+
+                // Manager's personal metrics
+                const managerHighPriority = managerItems.filter(i => i.priority === 'high').length;
+                const managerTotalHours = managerItems.reduce((sum, i) => sum + i.estimatedHours, 0);
+
+                const taskTotals = teamMembers.map(m => {
+                    const personKey = memberToPerson[m.id];
+                    const tasks = (self.workItems[personKey] && self.workItems[personKey]['individual']) || self.memberTasks[m.id] || [];
+                    return {
+                        memberId: m.id,
+                        hours: tasks.reduce((sum, t) => sum + (t.hours || t.estimatedHours || 0), 0)
+                    };
+                });
+                const overallocated = taskTotals.filter(t => t.hours > 40).length;
+                const totalCommitted = taskTotals.reduce((sum, t) => sum + t.hours, 0);
+                const totalAvailable = teamMembers.reduce((sum, m) => sum + m.available, 0);
+
+                return `<div class="max-w-7xl mx-auto px-4 py-12">
+                    <div style="margin-bottom: 48px;">
+                        <div style="display: grid; grid-template-columns: 1fr auto; align-items: center; justify-items: end; margin-bottom: 24px; cursor: pointer; gap: 16px;">
+                            <h2 style="font-size: 24px; font-weight: bold; margin: 0; justify-self: start;">📌 My Work (You)</h2>
+                            <button class="toggle-section" data-section="myTasks" style="background: none; border: none; font-size: 24px; cursor: pointer; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; padding: 0; line-height: 1;">
+                                ${this.expandedSections.myTasks ? '▼' : '▶'}
+                            </button>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; ${this.expandedSections.myTasks ? 'display: grid;' : 'display: none;'}">
+                            <div class="metric-card tooltip">
+                                <div class="metric-label">My Items <span class="info-icon">?</span></div>
+                                <div class="metric-value">${managerItems.length}</div>
+                                <div style="font-size: 14px; color: #6b7280; margin-top: 8px;">${managerHighPriority} high priority</div>
+                                <div class="tooltiptext">${this.getMetricExplanation('items')}</div>
+                            </div>
+                            <div class="metric-card tooltip">
+                                <div class="metric-label">My Committed Hours <span class="info-icon">?</span></div>
+                                <div class="metric-value">${managerTotalHours}</div>
+                                <div style="font-size: 14px; color: #6b7280; margin-top: 8px;">of 50h/week available</div>
+                                <div class="tooltiptext">${this.getMetricExplanation('hours')}</div>
+                            </div>
+                            <div class="metric-card tooltip">
+                                <div class="metric-label">Utilization <span class="info-icon">?</span></div>
+                                <div class="metric-value">${Math.round((managerTotalHours / 50) * 100)}%</div>
+                                <div style="font-size: 14px; color: #6b7280; margin-top: 8px;">personal capacity</div>
+                                <div class="tooltiptext">${this.getMetricExplanation('hours')}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 48px;">
+                        <div style="display: grid; grid-template-columns: 1fr auto; align-items: center; justify-items: end; margin-bottom: 24px; cursor: pointer; gap: 16px;">
+                            <h2 style="font-size: 24px; font-weight: bold; margin: 0; justify-self: start;">👥 Team Capacity & Workload</h2>
+                            <button class="toggle-section" data-section="teamCapacity" style="background: none; border: none; font-size: 24px; cursor: pointer; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; padding: 0; line-height: 1;">
+                                ${this.expandedSections.teamCapacity ? '▼' : '▶'}
+                            </button>
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 48px; ${this.expandedSections.teamCapacity ? 'display: grid;' : 'display: none;'}">
+                        <div class="metric-card tooltip">
+                            <div class="metric-label">Team at Risk <span class="info-icon">?</span></div>
+                            <div class="metric-value">${overallocated}</div>
+                            <div style="font-size: 14px; color: #6b7280; margin-top: 8px;">of ${teamMembers.length} team members</div>
+                            <div class="tooltiptext">${this.getMetricExplanation('items')}</div>
+                        </div>
+                        <div class="metric-card tooltip">
+                            <div class="metric-label">Team Capacity <span class="info-icon">?</span></div>
+                            <div class="metric-value">${Math.round((totalCommitted / totalAvailable) * 100)}%</div>
+                            <div style="font-size: 14px; color: #6b7280; margin-top: 8px;">${totalCommitted}h / ${totalAvailable}h</div>
+                            <div class="tooltiptext">${this.getMetricExplanation('hours')}</div>
+                        </div>
+                        <div class="metric-card tooltip">
+                            <div class="metric-label">Alignment <span class="info-icon">?</span></div>
+                            <div class="metric-value">68%</div>
+                            <div style="font-size: 14px; color: #6b7280; margin-top: 8px;">on manager priorities</div>
+                            <div class="tooltiptext">${this.getMetricExplanation('sources')}</div>
+                        </div>
+                    </div>
+                    </div>
+
+                    <div style="margin-bottom: 32px;">
+                        <div style="display: grid; grid-template-columns: 1fr auto; align-items: center; justify-items: end; margin-bottom: 24px; cursor: pointer; gap: 16px;">
+                            <h2 style="font-size: 24px; font-weight: bold; margin: 0; justify-self: start;">👤 Team Member Capacity & Tasks</h2>
+                            <button class="toggle-section" data-section="teamMembers" style="background: none; border: none; font-size: 24px; cursor: pointer; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; padding: 0; line-height: 1;">
+                                ${this.expandedSections.teamMembers ? '▼' : '▶'}
+                            </button>
+                        </div>
+                        <div style="${this.expandedSections.teamMembers ? 'display: block;' : 'display: none;'}">
+                        ${teamMembers.map(member => {
+                            const personKey = memberToPerson[member.id];
+                            const tasks = (self.workItems[personKey] && self.workItems[personKey]['individual']) || self.memberTasks[member.id] || [];
+                            const taskTotal = tasks.reduce((sum, t) => sum + (t.hours || t.estimatedHours || 0), 0);
+                            const utilization = Math.round((taskTotal / member.available) * 100);
+                            const statusColor = utilization > 100 ? '#ef4444' : utilization > 90 ? '#f59e0b' : '#10b981';
+                            const statusEmoji = utilization > 100 ? '⚠️' : utilization > 90 ? '⚡' : '✅';
+                            return `
+                                <div style="background: #f9fafb; border-radius: 8px; padding: 20px; margin-bottom: 16px;">
+                                    <div style="display: flex; justify-content: space-between; margin-bottom: 12px;">
+                                        <div>
+                                            <div style="font-weight: 600; font-size: 16px; color: #111827;">${member.name}</div>
+                                            <div style="font-size: 14px; color: #6b7280;">${member.role}</div>
+                                        </div>
+                                        <div style="text-align: right;">
+                                            <div style="font-size: 24px; font-weight: bold; color: ${statusColor};">${statusEmoji} ${utilization}%</div>
+                                            <div style="font-size: 12px; color: #6b7280;">${taskTotal}h / ${member.available}h</div>
+                                        </div>
+                                    </div>
+                                    <div style="background: linear-gradient(90deg, #10b981 0%, #3b82f6 50%, #f59e0b 85%, #ef4444 100%); height: 6px; border-radius: 3px; margin-bottom: 12px;"></div>
+                                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                        ${tasks.slice(0, 3).map(task => {
+                                            const priorityColor = task.priority === 'high' ? '#ef4444' : task.priority === 'medium' ? '#f59e0b' : '#3b82f6';
+                                            return `<span style="background: ${priorityColor}20; color: ${priorityColor}; padding: 4px 12px; border-radius: 12px; font-size: 12px; border: 1px solid ${priorityColor};" title="${task.title}">${task.title.substring(0, 20)}...</span>`;
+                                        }).join('')}
+                                        ${tasks.length > 3 ? `<span style="background: #dbeafe; color: #1e40af; padding: 4px 12px; border-radius: 12px; font-size: 12px;">+${tasks.length - 3} more</span>` : ''}
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                        </div>
+                    </div>
+
+                    <div style="background: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 8px; padding: 20px;">
+                        <div style="font-weight: 600; color: #b45309; margin-bottom: 8px;">⚠️ Immediate Action: Review team allocation</div>
+                        <p style="color: #92400e; font-size: 14px;">Go to "My Queue" tab to see all tasks for each team member and make adjustments. You can defer tasks, reassign work, or reprioritize as needed.</p>
+                    </div>
+                </div>`;
+            }
+
+            renderQueue() {
+                const user = this.personaToUser[this.currentPersona];
+
+                if (this.currentPersona.endsWith('-manager')) {
+                    return this.renderManagerQueue();
+                }
+
+                const role = this.currentPersona.endsWith('-executive') ? 'executive' : 'individual';
+                const items = this.workItems[user][role];
+                const sorted = [...items].sort((a, b) => {
+                    const order = { high: 0, medium: 1, low: 2 };
+                    return order[a.priority] - order[b.priority];
+                });
+
+                return `<div class="max-w-7xl mx-auto px-4 py-12">
+                    <div style="display: grid; grid-template-columns: 1fr auto; align-items: center; justify-items: end; margin-bottom: 24px; cursor: pointer; gap: 16px;">
+                        <h2 style="font-size: 24px; font-weight: bold; margin: 0; justify-self: start;">📋 My Work Queue</h2>
+                        <button class="toggle-section" data-section="myQueue" style="background: none; border: none; font-size: 24px; cursor: pointer; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; padding: 0; line-height: 1;">
+                            ${this.expandedSections.myQueue ? '▼' : '▶'}
+                        </button>
+                    </div>
+                    <div style="${this.expandedSections.myQueue ? 'display: block;' : 'display: none;'}">
+                    ${sorted.map(item => `
+                        <div class="work-item priority-${item.priority}">
+                            <div style="display: flex; justify-content: space-between;">
+                                <div style="flex: 1;">
+                                    <div style="margin-bottom: 8px;">
+                                        <span class="badge" style="background-color: ${item.priority === 'high' ? '#ef444430' : item.priority === 'medium' ? '#f59e0b30' : '#3b82f630'}; color: ${item.priority === 'high' ? '#ef4444' : item.priority === 'medium' ? '#f59e0b' : '#3b82f6'}; border: 1px solid;">
+                                            ${item.priority.toUpperCase()}
+                                        </span>
+                                        <span class="badge" style="background-color: #dbeafe; color: #1e40af; border: 1px solid #93c5fd;">${item.source}</span>
+                                        <span style="font-size: 14px; font-weight: 600; color: #4b5563;">Due: ${item.deadline}</span>
+                                    </div>
+                                    <h3 style="font-size: 18px; font-weight: 600; color: #111827; margin-bottom: 4px;">${item.title}</h3>
+                                    <p style="color: #4b5563; font-size: 14px;">${item.description}</p>
+                                </div>
+                                <div style="text-align: right; margin-left: 16px;">
+                                    <div style="font-size: 24px; font-weight: bold; color: #111827;">${item.estimatedHours}h</div>
+                                </div>
+                            </div>
+                            <div style="background-color: #f3f4f6; padding: 8px 12px; border-radius: 4px; font-size: 14px; color: #374151; margin-top: 12px; display: inline-block;">
+                                💫 Impact: ${item.impact}
+                            </div>
+                            <div class="explanation">
+                                <strong>Why it's here:</strong> ${this.getItemExplanation(item)}
+                            </div>
+                        </div>
+                    `).join('')}
+                    </div>
+                </div>`;
+            }
+
+            renderManagerQueue() {
+                const teamMembers = this.workItems['alex-torres'].manager;
+                const managerItems = this.workItems['alex-torres'].individual;
+                const self = this;
+
+                // Map member IDs to person keys for task lookup
+                const memberToPerson = {
+                    1: 'sarah-chen',
+                    2: 'alex-rodriguez',
+                    3: 'jordan-kim',
+                    4: 'casey-patel'
+                };
+
+                // Sort manager's personal tasks by priority
+                const sortedManagerItems = [...managerItems].sort((a, b) => {
+                    const order = { high: 0, medium: 1, low: 2 };
+                    return order[a.priority] - order[b.priority];
+                });
+
+                return `<div class="max-w-7xl mx-auto px-4 py-12">
+                    <div style="display: grid; grid-template-columns: 1fr auto; align-items: center; justify-items: end; margin-bottom: 24px; cursor: pointer; gap: 16px;">
+                        <h2 style="font-size: 24px; font-weight: bold; margin: 0; justify-self: start;">📌 My Tasks (You)</h2>
+                        <button class="toggle-section" data-section="myTasks" style="background: none; border: none; font-size: 24px; cursor: pointer; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; padding: 0; line-height: 1;">
+                            ${this.expandedSections.myTasks ? '▼' : '▶'}
+                        </button>
+                    </div>
+                    <div style="margin-bottom: 48px; ${this.expandedSections.myTasks ? 'display: block;' : 'display: none;'}">
+                        ${sortedManagerItems.map(item => `
+                            <div class="work-item priority-${item.priority}">
+                                <div style="display: flex; justify-content: space-between;">
+                                    <div style="flex: 1;">
+                                        <div style="margin-bottom: 8px;">
+                                            <span class="badge" style="background-color: ${item.priority === 'high' ? '#ef444430' : item.priority === 'medium' ? '#f59e0b30' : '#3b82f630'}; color: ${item.priority === 'high' ? '#ef4444' : item.priority === 'medium' ? '#f59e0b' : '#3b82f6'}; border: 1px solid;">
+                                                ${item.priority.toUpperCase()}
+                                            </span>
+                                            <span class="badge" style="background-color: #dbeafe; color: #1e40af; border: 1px solid #93c5fd;">${item.source}</span>
+                                            <span style="font-size: 14px; font-weight: 600; color: #4b5563;">Due: ${item.deadline}</span>
+                                        </div>
+                                        <h3 style="font-size: 18px; font-weight: 600; color: #111827; margin-bottom: 4px;">${item.title}</h3>
+                                        <p style="color: #4b5563; font-size: 14px;">${item.description}</p>
+                                    </div>
+                                    <div style="text-align: right; margin-left: 16px;">
+                                        <div style="font-size: 24px; font-weight: bold; color: #111827;">${item.estimatedHours}h</div>
+                                    </div>
+                                </div>
+                                <div style="background-color: #f3f4f6; padding: 8px 12px; border-radius: 4px; font-size: 14px; color: #374151; margin-top: 12px; display: inline-block;">
+                                    💫 Impact: ${item.impact}
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr auto; align-items: center; justify-items: end; margin-bottom: 24px; cursor: pointer; gap: 16px;">
+                        <h2 style="font-size: 24px; font-weight: bold; margin: 0; justify-self: start;">👥 Team Workload & Task Management</h2>
+                        <button class="toggle-section" data-section="teamWorkload" style="background: none; border: none; font-size: 24px; cursor: pointer; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; padding: 0; line-height: 1;">
+                            ${this.expandedSections.teamWorkload ? '▼' : '▶'}
+                        </button>
+                    </div>
+
+                    <div style="space-y: 3; ${this.expandedSections.teamWorkload ? 'display: block;' : 'display: none;'}">
+                        ${teamMembers.map(member => {
+                            const personKey = memberToPerson[member.id];
+                            const tasks = (self.workItems[personKey] && self.workItems[personKey]['individual']) || self.memberTasks[member.id] || [];
+                            const taskTotal = tasks.reduce((sum, t) => sum + (t.hours || t.estimatedHours || 0), 0);
+                            const utilization = Math.round((taskTotal / member.available) * 100);
+                            const statusColor = utilization > 100 ? '#ef4444' : utilization > 80 ? '#f59e0b' : '#10b981';
+                            const statusText = utilization > 100 ? 'Overallocated' : utilization > 80 ? 'Near Full' : 'Healthy';
+                            const currentPriority = self.teamPriorities[member.id];
+                            const priorityColor = currentPriority === 'high' ? '#ef4444' : currentPriority === 'medium' ? '#f59e0b' : '#3b82f6';
+                            const priorityText = currentPriority === 'high' ? 'High' : currentPriority === 'medium' ? 'Medium' : 'Low';
+                            const isExpanded = self.expandedMember === member.id;
+
+                            return `
+                                <div style="background: white; border-radius: 8px; margin-bottom: 16px; border: 1px solid #e5e7eb; overflow: hidden;">
+                                    <!-- Header Row -->
+                                    <div style="display: grid; grid-template-columns: 50px 1fr 120px 100px 100px 80px; align-items: center; padding: 16px; background: #f9fafb; border-bottom: ${isExpanded ? '2px solid #3b82f6' : '1px solid #e5e7eb'}; cursor: pointer;">
+                                        <button class="expand-member" data-member-id="${member.id}" style="background: none; border: none; font-size: 16px; cursor: pointer;">
+                                            ${isExpanded ? '▼' : '▶'}
+                                        </button>
+                                        <div>
+                                            <div style="font-weight: 600; font-size: 16px;">${member.name}</div>
+                                            <div style="font-size: 12px; color: #6b7280;">${member.role}</div>
+                                        </div>
+                                        <div style="text-align: center;">
+                                            <div style="font-weight: 600;">${utilization}%</div>
+                                            <div style="font-size: 12px; color: #6b7280;">${member.committed}h/${member.available}h</div>
+                                        </div>
+                                        <button class="priority-toggle" data-member-id="${member.id}" style="background-color: ${priorityColor}30; color: ${priorityColor}; border: 2px solid ${priorityColor}; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; cursor: pointer;">
+                                            ${priorityText}
+                                        </button>
+                                        <span style="display: inline-block; padding: 4px 12px; background-color: ${statusColor}20; color: ${statusColor}; border: 1px solid ${statusColor}; border-radius: 20px; font-size: 12px; font-weight: 600;">${statusText}</span>
+                                        <div style="text-align: right; color: #6b7280;">
+                                            ${tasks.length} tasks
+                                        </div>
+                                    </div>
+
+                                    <!-- Expanded Detail View -->
+                                    ${isExpanded ? `
+                                        <div style="padding: 20px; border-top: 1px solid #e5e7eb; background: #fafbfc;">
+                                            ${(() => {
+                                                const totalHours = tasks.reduce((sum, t) => sum + (t.hours || t.estimatedHours || 0), 0);
+                                                const hoursRemaining = member.available - totalHours;
+                                                const overallocation = totalHours > member.available;
+                                                return `
+                                                    <div style="background: white; padding: 16px; border-radius: 8px; margin-bottom: 16px; border-left: 4px solid ${overallocation ? '#ef4444' : '#10b981'};">
+                                                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-bottom: 12px;">
+                                                            <div>
+                                                                <div style="font-size: 12px; color: #6b7280;">Total Committed</div>
+                                                                <div style="font-size: 20px; font-weight: 600; color: #111827;">${totalHours}h</div>
+                                                            </div>
+                                                            <div>
+                                                                <div style="font-size: 12px; color: #6b7280;">Available</div>
+                                                                <div style="font-size: 20px; font-weight: 600; color: #111827;">${member.available}h</div>
+                                                            </div>
+                                                            <div>
+                                                                <div style="font-size: 12px; color: #6b7280;">Remaining</div>
+                                                                <div style="font-size: 20px; font-weight: 600; color: ${hoursRemaining < 0 ? '#ef4444' : '#10b981'};">${hoursRemaining < 0 ? '−' + Math.abs(hoursRemaining) : hoursRemaining}h</div>
+                                                            </div>
+                                                        </div>
+                                                        <div style="background: linear-gradient(90deg, #10b981 0%, #3b82f6 50%, #f59e0b 85%, #ef4444 100%); height: 6px; border-radius: 3px;"></div>
+                                                    </div>
+                                                `;
+                                            })()}
+
+                                            <h4 style="font-weight: 600; margin-bottom: 12px; color: #111827;">Tasks & Time Allocation</h4>
+                                            <div style="space-y: 2;">
+                                                ${tasks.map((task, idx) => {
+                                                    const taskPriorityColor = task.priority === 'high' ? '#ef4444' : task.priority === 'medium' ? '#f59e0b' : '#3b82f6';
+                                                    return `
+                                                        <div style="background: white; padding: 14px; border-radius: 6px; margin-bottom: 8px; border-left: 4px solid ${taskPriorityColor}; display: flex; justify-content: space-between; align-items: center;">
+                                                            <div style="flex: 1;">
+                                                                <div style="font-weight: 500; color: #111827;">${task.title}</div>
+                                                                <div style="font-size: 12px; color: #6b7280; margin-top: 4px;">
+                                                                    <strong>${task.priority}</strong> priority • <strong>${task.hours || task.estimatedHours}h</strong> estimated
+                                                                </div>
+                                                            </div>
+                                                            <div style="display: flex; gap: 8px; margin-left: 16px; align-items: center;">
+                                                                <div style="background: #f3f4f6; padding: 6px 12px; border-radius: 6px; font-weight: 600; color: #3b82f6; min-width: 40px; text-align: center;">
+                                                                    ${task.hours || task.estimatedHours}h
+                                                                </div>
+                                                                <button class="defer-task" data-member-id="${member.id}" data-task-id="${task.id}" style="background: none; border: 1px solid #d1d5db; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; color: #6b7280; font-weight: 500;" title="Defer to backlog">
+                                                                    ↻
+                                                                </button>
+                                                                <button class="task-priority-toggle" data-member-id="${member.id}" data-task-id="${task.id}" style="background: none; border: 1px solid #d1d5db; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; color: #6b7280; font-weight: 500;">
+                                                                    📋
+                                                                </button>
+                                                                ${idx > 0 ? `
+                                                                    <button class="move-task-up" data-member-id="${member.id}" data-task-id="${task.id}" style="background: none; border: 1px solid #d1d5db; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; color: #6b7280;">
+                                                                        ↑
+                                                                    </button>
+                                                                ` : ''}
+                                                                ${idx < tasks.length - 1 ? `
+                                                                    <button class="move-task-down" data-member-id="${member.id}" data-task-id="${task.id}" style="background: none; border: 1px solid #d1d5db; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; color: #6b7280;">
+                                                                        ↓
+                                                                    </button>
+                                                                ` : ''}
+                                                            </div>
+                                                        </div>
+                                                    `;
+                                                }).join('')}
+                                            </div>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+
+                    <!-- Team Backlog Section -->
+                    <div style="margin-top: 40px; margin-bottom: 32px;">
+                        <div style="display: grid; grid-template-columns: 1fr auto; align-items: center; justify-items: end; margin-bottom: 16px; cursor: pointer; gap: 16px;">
+                            <h2 style="font-size: 24px; font-weight: bold; margin: 0; justify-self: start;">
+                                📦 Team Backlog ${self.teamBacklog.length > 0 ? `(${self.teamBacklog.length} deferred)` : '(empty)'}
+                            </h2>
+                            <button class="toggle-section" data-section="teamBacklog" style="background: none; border: none; font-size: 24px; cursor: pointer; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; padding: 0; line-height: 1;">
+                                ${this.expandedSections.teamBacklog ? '▼' : '▶'}
+                            </button>
+                        </div>
+                        ${this.expandedSections.teamBacklog ? (self.teamBacklog.length > 0 ? `
+                            <div style="background: white; border-radius: 8px; overflow: hidden; border: 2px solid #fef3c7;">
+                                ${self.teamBacklog.map(backlogTask => {
+                                    const taskPriorityColor = backlogTask.priority === 'high' ? '#ef4444' : backlogTask.priority === 'medium' ? '#f59e0b' : '#3b82f6';
+                                    const availableMembers = teamMembers.filter(m => {
+                                        const memberTasks = self.memberTasks[m.id];
+                                        const memberHours = memberTasks.reduce((sum, t) => sum + t.hours, 0);
+                                        return memberHours + backlogTask.hours <= m.available;
+                                    });
+
+                                    return `
+                                        <div style="padding: 16px; border-bottom: 1px solid #e5e7eb; background: #fffbeb; border-left: 4px solid ${taskPriorityColor};">
+                                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                                                <div>
+                                                    <div style="font-weight: 600; color: #111827; margin-bottom: 4px;">${backlogTask.title}</div>
+                                                    <div style="font-size: 12px; color: #6b7280; margin-bottom: 4px;">
+                                                        From <strong>${backlogTask.originalMemberName}</strong> • <strong>${backlogTask.hours}h</strong> • ${backlogTask.priority} priority • Deferred ${backlogTask.deferredAt}
+                                                    </div>
+                                                </div>
+                                                <button class="return-task" data-task-id="${backlogTask.id}" style="background: none; border: 1px solid #d1d5db; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; color: #6b7280; font-weight: 500;">
+                                                    ↩️ Return
+                                                </button>
+                                            </div>
+                                            ${availableMembers.length > 0 ? `
+                                                <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                                                    <span style="font-size: 12px; color: #6b7280; font-weight: 500; align-self: center;">Can assign to:</span>
+                                                    ${availableMembers.map(member => {
+                                                        const memberHours = self.memberTasks[member.id].reduce((sum, t) => sum + t.hours, 0);
+                                                        const availableHours = member.available - memberHours;
+                                                        return `
+                                                            <button class="reassign-task" data-task-id="${backlogTask.id}" data-new-member-id="${member.id}" style="background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: 500;">
+                                                                ${member.name} (+${availableHours}h)
+                                                            </button>
+                                                        `;
+                                                    }).join('')}
+                                                </div>
+                                            ` : `
+                                                <div style="font-size: 12px; color: #991b1b; background: #fee2e2; padding: 8px 12px; border-radius: 4px; font-weight: 500;">
+                                                    ⚠️ No team members have capacity for this task. Consider splitting work or extending timeline.
+                                                </div>
+                                            `}
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        ` : `
+                            <div style="background: white; border-radius: 8px; padding: 32px; text-align: center; color: #6b7280;">
+                                <div style="font-size: 48px; margin-bottom: 8px;">✅</div>
+                                <div>No deferred tasks. Team workload is balanced.</div>
+                            </div>
+                        `) : ''}
+                    </div>
+
+                    <div style="margin-top: 40px;">
+                        <div style="display: grid; grid-template-columns: 1fr auto; align-items: center; justify-items: end; margin-bottom: 16px; cursor: pointer; gap: 16px;">
+                            <h2 style="font-size: 24px; font-weight: bold; margin: 0; justify-self: start;">🎯 Team Priorities This Week</h2>
+                            <button class="toggle-section" data-section="teamPriorities" style="background: none; border: none; font-size: 24px; cursor: pointer; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; padding: 0; line-height: 1;">
+                                ${this.expandedSections.teamPriorities ? '▼' : '▶'}
+                            </button>
+                        </div>
+                        <div style="space-y: 2; ${this.expandedSections.teamPriorities ? 'display: block;' : 'display: none;'}">
+                            <div style="background: #fef3c7; border-left: 4px solid #f59e0b; padding: 16px; border-radius: 4px; margin-bottom: 12px;">
+                                <div style="font-weight: 600; color: #b45309;">Code Review Velocity Initiative</div>
+                                <div style="font-size: 14px; color: #92400e; margin-top: 4px;">Team goal: Reduce PR review time by 25%. 5 team members engaged (68% team focus).</div>
+                            </div>
+                            <div style="background: #dbeafe; border-left: 4px solid #3b82f6; padding: 16px; border-radius: 4px;">
+                                <div style="font-weight: 600; color: #1e40af;">Customer Retention Dashboard</div>
+                                <div style="font-size: 14px; color: #1e3a8a; margin-top: 4px;">Organization priority. Design review scheduled for Thursday. Sarah and Jordan assigned.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            }
+
+            renderSources() {
+                return `<div class="max-w-7xl mx-auto px-4 py-12">
+                    <h2 style="font-size: 24px; font-weight: bold; margin-bottom: 24px;">Work Sources Aggregated by Prism</h2>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px;">
+                        <div style="background: white; border-radius: 8px; padding: 24px; border-left: 4px solid #3b82f6;">
+                            <h3 style="font-size: 18px; font-weight: bold; color: #1e40af; margin-bottom: 12px;">
+                                📧 Email & Calendar
+                                <span class="tooltip" style="display: inline-block; margin-left: 8px;">
+                                    <span class="info-icon">?</span>
+                                    <span class="tooltiptext" style="width: 300px; margin-left: -150px; text-align: left;">
+                                        <div style="font-weight: 600; color: #60a5fa; margin-bottom: 8px;">Integrated Tools:</div>
+                                        <div style="color: #e5e7eb; margin-bottom: 12px;">Gmail, Outlook, Google Calendar, Outlook Calendar, Apple Calendar</div>
+                                        <div style="font-weight: 600; color: #60a5fa; margin-bottom: 8px;">Extracts:</div>
+                                        <div style="color: #e5e7eb;">Meeting invites, email requests, deadlines, calendar blocks</div>
+                                    </span>
+                                </span>
+                            </h3>
+                            <p style="color: #4b5563; margin-bottom: 16px;">Extracts tasks and deadlines from email and calendar events</p>
+                        </div>
+                        <div style="background: white; border-radius: 8px; padding: 24px; border-left: 4px solid #8b5cf6;">
+                            <h3 style="font-size: 18px; font-weight: bold; color: #5b21b6; margin-bottom: 12px;">
+                                💬 Slack & Teams
+                                <span class="tooltip" style="display: inline-block; margin-left: 8px;">
+                                    <span class="info-icon">?</span>
+                                    <span class="tooltiptext" style="width: 300px; margin-left: -150px; text-align: left;">
+                                        <div style="font-weight: 600; color: #c084fc; margin-bottom: 8px;">Integrated Tools:</div>
+                                        <div style="color: #e5e7eb; margin-bottom: 12px;">Slack, Microsoft Teams</div>
+                                        <div style="font-weight: 600; color: #c084fc; margin-bottom: 8px;">Monitors:</div>
+                                        <div style="color: #e5e7eb;">Direct messages, mentions, channel discussions, requests, informal commitments</div>
+                                    </span>
+                                </span>
+                            </h3>
+                            <p style="color: #4b5563; margin-bottom: 16px;">Monitors conversations for requests and commitments</p>
+                        </div>
+                        <div style="background: white; border-radius: 8px; padding: 24px; border-left: 4px solid #ec4899;">
+                            <h3 style="font-size: 18px; font-weight: bold; color: #831843; margin-bottom: 12px;">
+                                👤 Manager Priorities
+                                <span class="tooltip" style="display: inline-block; margin-left: 8px;">
+                                    <span class="info-icon">?</span>
+                                    <span class="tooltiptext" style="width: 300px; margin-left: -150px; text-align: left;">
+                                        <div style="font-weight: 600; color: #f472b6; margin-bottom: 8px;">Sources:</div>
+                                        <div style="color: #e5e7eb; margin-bottom: 12px;">1:1 meetings, Slack directs, Email, Project management tools</div>
+                                        <div style="font-weight: 600; color: #f472b6; margin-bottom: 8px;">Captures:</div>
+                                        <div style="color: #e5e7eb;">Formal OKRs, team goals, performance expectations, feedback priorities</div>
+                                    </span>
+                                </span>
+                            </h3>
+                            <p style="color: #4b5563; margin-bottom: 16px;">Receives formal and informal priorities from managers</p>
+                        </div>
+                        <div style="background: white; border-radius: 8px; padding: 24px; border-left: 4px solid #22c55e;">
+                            <h3 style="font-size: 18px; font-weight: bold; color: #15803d; margin-bottom: 12px;">
+                                🏢 Org Priorities
+                                <span class="tooltip" style="display: inline-block; margin-left: 8px;">
+                                    <span class="info-icon">?</span>
+                                    <span class="tooltiptext" style="width: 320px; margin-left: -160px; text-align: left;">
+                                        <div style="font-weight: 600; color: #86efac; margin-bottom: 8px;">OKR Tools:</div>
+                                        <div style="color: #e5e7eb; margin-bottom: 12px;">15Five, Ally, Gtmhub, Perdoo, Cascade</div>
+                                        <div style="font-weight: 600; color: #86efac; margin-bottom: 8px;">Project Management:</div>
+                                        <div style="color: #e5e7eb; margin-bottom: 12px;">Jira, Linear, Asana</div>
+                                        <div style="font-weight: 600; color: #86efac; margin-bottom: 8px;">Strategic Docs:</div>
+                                        <div style="color: #e5e7eb; margin-bottom: 12px;">Confluence, Notion, Google Docs</div>
+                                        <div style="font-weight: 600; color: #86efac; margin-bottom: 8px;">Executive Sources:</div>
+                                        <div style="color: #e5e7eb;">Board Materials &amp; Executive Dashboards</div>
+                                    </span>
+                                </span>
+                            </h3>
+                            <p style="color: #4b5563; margin-bottom: 16px;">Cascades strategic priorities from leadership</p>
+                        </div>
+                    </div>
+                </div>`;
+            }
+
+            renderCapacity() {
+                const user = this.personaToUser[this.currentPersona];
+                const role = this.currentPersona.endsWith('-manager') ? 'manager' : this.currentPersona.endsWith('-executive') ? 'executive' : 'individual';
+                const items = this.workItems[user][role];
+                const totalHours = items.reduce((sum, i) => sum + i.estimatedHours, 0);
+                const availableHours = this.currentPersona.endsWith('-manager') ? 50 : 40;
+                const utilizationPercent = Math.min(100, Math.round((totalHours / availableHours) * 100));
+
+                return `<div class="max-w-7xl mx-auto px-4 py-12">
+                    <h2 style="font-size: 24px; font-weight: bold; margin-bottom: 24px;">Capacity Utilization</h2>
+                    <div style="background: white; border-radius: 8px; padding: 32px;">
+                        <div style="margin-bottom: 24px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                                <span style="font-weight: 600; color: #111827;">Current Workload</span>
+                                <span style="font-weight: 600; color: #111827;">${totalHours}h / ${availableHours}h (${utilizationPercent}%)</span>
+                            </div>
+                            <div style="background: linear-gradient(90deg, #10b981 0%, #3b82f6 50%, #f59e0b 85%, #ef4444 100%); height: 8px; border-radius: 4px;"></div>
+                        </div>
+                        ${utilizationPercent > 100 ? '<div style="background-color: #fee2e2; border: 1px solid #fecaca; border-radius: 8px; padding: 16px;"><div style="font-weight: 600; color: #991b1b;">⚠️ Overallocated</div></div>' : '<div style="background-color: #dbeafe; border: 1px solid #bfdbfe; border-radius: 8px; padding: 16px;"><div style="font-weight: 600; color: #1e40af;">✅ Healthy Capacity</div></div>'}
+                    </div>
+                </div>`;
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            new PrismDemo();
+        });
+    </script>
+</body>
+</html>
