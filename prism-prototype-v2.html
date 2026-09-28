@@ -40,7 +40,9 @@
                     'alex-torres-individual': 'alex-torres',
                     'alex-torres-manager': 'alex-torres',
                     'jennifer-lee-individual': 'jennifer-lee',
-                    'jennifer-lee-executive': 'jennifer-lee'
+                    'jennifer-lee-executive': 'jennifer-lee',
+                    'devon-integration-admin': 'devon',
+                    'rachel-security-lead': 'rachel'
                 };
                 this.workItems = this.initializeWorkItems();
                 this.teamPriorities = { 1: 'high', 2: 'medium', 3: 'high', 4: 'medium' };
@@ -151,6 +153,21 @@
                             { id: 1, title: 'Customer Retention Initiative - Organizational Priority', description: 'Drive adoption of customer health dashboard across teams', priority: 'high', source: 'org', deadline: 'Q4 2024', estimatedHours: 40, impact: 'Revenue impact: $2M potential' },
                             { id: 2, title: 'Engineering velocity improvement', description: 'Reduce PR review time, improve deployment frequency', priority: 'high', source: 'org', deadline: 'This Quarter', estimatedHours: 20, impact: 'Improves team productivity 15-20%' },
                             { id: 3, title: 'Compliance and SOC2 audit preparation', description: 'Coordinate security audit across organization', priority: 'high', source: 'manager', deadline: 'Q1 2025', estimatedHours: 30, impact: 'Enables enterprise sales' }
+                        ]
+                    },
+                    'devon': {
+                        admin: [
+                            { id: 1, name: 'Outlook', type: 'Email/Calendar', status: 'healthy', users: 523, uptime: '100%', lastSync: '5 min', syncFreq: '15 min', issues: 0 },
+                            { id: 2, name: 'Slack', type: 'Chat', status: 'healthy', users: 456, uptime: '100%', lastSync: '3 min', syncFreq: '15 min', issues: 0 },
+                            { id: 3, name: 'Workday', type: 'HR/Org', status: 'healthy', users: 500, uptime: '100%', lastSync: '1h', syncFreq: '1h', issues: 0 },
+                            { id: 4, name: 'Jira', type: 'Project Mgmt', status: 'degraded', users: 245, uptime: '98.5%', lastSync: '15 min', syncFreq: '30 min', issues: 1 },
+                            { id: 5, name: 'LMS (Canvas)', type: 'Compliance', status: 'healthy', users: 500, uptime: '99.9%', lastSync: '6 min', syncFreq: '30 min', issues: 0 }
+                        ]
+                    },
+                    'rachel': {
+                        approvals: [
+                            { id: 1, name: 'Rally Integration', type: 'Project Management', requestedBy: 'Devon', requestedAt: '2 days ago', status: 'pending', complianceScore: 4, issues: ['SOC2 Certification'] },
+                            { id: 2, name: 'LMS v2 (Canvas Update)', type: 'Compliance', requestedBy: 'Devon', requestedAt: '4 hours ago', status: 'ready', complianceScore: 5, issues: [] }
                         ]
                     }
                 };
@@ -341,15 +358,30 @@
             render() {
                 const app = document.getElementById('app');
                 let content = '';
+                const isAdmin = this.currentPersona.includes('-admin') || this.currentPersona.includes('security-lead');
 
-                if (this.currentTab === 'dashboard') {
-                    content = this.renderDashboard();
-                } else if (this.currentTab === 'queue') {
-                    content = this.renderQueue();
-                } else if (this.currentTab === 'sources') {
-                    content = this.renderSources();
-                } else if (this.currentTab === 'capacity') {
-                    content = this.renderCapacity();
+                if (isAdmin) {
+                    if (this.currentTab === 'dashboard') {
+                        content = this.renderAdminDashboard();
+                    } else if (this.currentTab === 'integrations') {
+                        content = this.renderIntegrations();
+                    } else if (this.currentTab === 'approvals') {
+                        content = this.renderApprovals();
+                    } else if (this.currentTab === 'health') {
+                        content = this.renderHealth();
+                    } else if (this.currentTab === 'audit') {
+                        content = this.renderAuditLogs();
+                    }
+                } else {
+                    if (this.currentTab === 'dashboard') {
+                        content = this.renderDashboard();
+                    } else if (this.currentTab === 'queue') {
+                        content = this.renderQueue();
+                    } else if (this.currentTab === 'sources') {
+                        content = this.renderSources();
+                    } else if (this.currentTab === 'capacity') {
+                        content = this.renderCapacity();
+                    }
                 }
 
                 app.innerHTML = this.renderHeader() + this.renderTabs() + content + '<div class="bg-gray-900 text-white py-8 mt-12"><div class="max-w-7xl mx-auto px-4 text-center"><p class="text-gray-400">This is a prototype demonstrating Prism concepts</p></div></div>';
@@ -361,14 +393,18 @@
                     'alex-torres-individual': 'Alex Torres',
                     'alex-torres-manager': 'Alex Torres',
                     'jennifer-lee-individual': 'Jennifer Lee',
-                    'jennifer-lee-executive': 'Jennifer Lee'
+                    'jennifer-lee-executive': 'Jennifer Lee',
+                    'devon-integration-admin': 'Devon',
+                    'rachel-security-lead': 'Rachel'
                 };
                 const personaEmojis = {
                     'sarah-chen-individual': '👤',
                     'alex-torres-individual': '👤',
                     'alex-torres-manager': '👥',
                     'jennifer-lee-individual': '👤',
-                    'jennifer-lee-executive': '🎯'
+                    'jennifer-lee-executive': '🎯',
+                    'devon-integration-admin': '⚙️',
+                    'rachel-security-lead': '🔒'
                 };
                 const currentName = userNames[this.currentPersona];
                 const currentEmoji = personaEmojis[this.currentPersona];
@@ -387,9 +423,17 @@
                             <div style="text-align: right;">
                                 <div style="font-size: 14px; opacity: 0.75;">Switch Role:</div>
                                 <select id="personaSelect" style="margin-top: 8px; padding: 8px 16px; background: white; color: #667eea; border-radius: 8px; font-weight: bold; cursor: pointer;">
-                                    <option value="sarah-chen-individual" ${this.currentPersona === 'sarah-chen-individual' ? 'selected' : ''}>👤 Sarah Chen (Engineer)</option>
-                                    <option value="alex-torres-manager" ${this.currentPersona === 'alex-torres-manager' ? 'selected' : ''}>👥 Alex Torres (Engineering Manager)</option>
-                                    <option value="jennifer-lee-executive" ${this.currentPersona === 'jennifer-lee-executive' ? 'selected' : ''}>🎯 Jennifer Lee (VP Engineering)</option>
+                                    <optgroup label="👤 Individual Contributors">
+                                        <option value="sarah-chen-individual" ${this.currentPersona === 'sarah-chen-individual' ? 'selected' : ''}>Sarah Chen (Engineer)</option>
+                                    </optgroup>
+                                    <optgroup label="👥 Managers & Leaders">
+                                        <option value="alex-torres-manager" ${this.currentPersona === 'alex-torres-manager' ? 'selected' : ''}>Alex Torres (Engineering Manager)</option>
+                                        <option value="jennifer-lee-executive" ${this.currentPersona === 'jennifer-lee-executive' ? 'selected' : ''}>Jennifer Lee (VP Engineering)</option>
+                                    </optgroup>
+                                    <optgroup label="⚙️ Admin & Operations">
+                                        <option value="devon-integration-admin" ${this.currentPersona === 'devon-integration-admin' ? 'selected' : ''}>Devon (Integration Admin)</option>
+                                        <option value="rachel-security-lead" ${this.currentPersona === 'rachel-security-lead' ? 'selected' : ''}>Rachel (Security/Compliance Lead)</option>
+                                    </optgroup>
                                 </select>
                             </div>
                         </div>
@@ -398,14 +442,28 @@
             }
 
             renderTabs() {
-                return `<div style="border-bottom: 1px solid #e5e7eb; background: white;">
-                    <div class="max-w-7xl mx-auto px-4">
-                        <button class="tab-button ${this.currentTab === 'dashboard' ? 'active' : ''}" data-tab="dashboard">📊 My Dashboard</button>
-                        <button class="tab-button ${this.currentTab === 'queue' ? 'active' : ''}" data-tab="queue">📋 My Queue</button>
-                        <button class="tab-button ${this.currentTab === 'sources' ? 'active' : ''}" data-tab="sources">🔄 Sources</button>
-                        <button class="tab-button ${this.currentTab === 'capacity' ? 'active' : ''}" data-tab="capacity">📈 My Capacity</button>
-                    </div>
-                </div>`;
+                const isAdmin = this.currentPersona.includes('-admin') || this.currentPersona.includes('security-lead');
+
+                if (isAdmin) {
+                    return `<div style="border-bottom: 1px solid #e5e7eb; background: white;">
+                        <div class="max-w-7xl mx-auto px-4">
+                            <button class="tab-button ${this.currentTab === 'dashboard' ? 'active' : ''}" data-tab="dashboard">📊 Dashboard</button>
+                            <button class="tab-button ${this.currentTab === 'integrations' ? 'active' : ''}" data-tab="integrations">🔌 Integrations</button>
+                            <button class="tab-button ${this.currentTab === 'health' ? 'active' : ''}" data-tab="health">❤️ Health Monitor</button>
+                            ${this.currentPersona.includes('security-lead') ? `<button class="tab-button ${this.currentTab === 'approvals' ? 'active' : ''}" data-tab="approvals">✅ Approvals</button>` : ''}
+                            ${this.currentPersona.includes('security-lead') ? `<button class="tab-button ${this.currentTab === 'audit' ? 'active' : ''}" data-tab="audit">📋 Audit Logs</button>` : ''}
+                        </div>
+                    </div>`;
+                } else {
+                    return `<div style="border-bottom: 1px solid #e5e7eb; background: white;">
+                        <div class="max-w-7xl mx-auto px-4">
+                            <button class="tab-button ${this.currentTab === 'dashboard' ? 'active' : ''}" data-tab="dashboard">📊 My Dashboard</button>
+                            <button class="tab-button ${this.currentTab === 'queue' ? 'active' : ''}" data-tab="queue">📋 My Queue</button>
+                            <button class="tab-button ${this.currentTab === 'sources' ? 'active' : ''}" data-tab="sources">🔄 Sources</button>
+                            <button class="tab-button ${this.currentTab === 'capacity' ? 'active' : ''}" data-tab="capacity">📈 My Capacity</button>
+                        </div>
+                    </div>`;
+                }
             }
 
             renderDashboard() {
@@ -994,6 +1052,214 @@
                             <div style="background: linear-gradient(90deg, #10b981 0%, #3b82f6 50%, #f59e0b 85%, #ef4444 100%); height: 8px; border-radius: 4px;"></div>
                         </div>
                         ${utilizationPercent > 100 ? '<div style="background-color: #fee2e2; border: 1px solid #fecaca; border-radius: 8px; padding: 16px;"><div style="font-weight: 600; color: #991b1b;">⚠️ Overallocated</div></div>' : '<div style="background-color: #dbeafe; border: 1px solid #bfdbfe; border-radius: 8px; padding: 16px;"><div style="font-weight: 600; color: #1e40af;">✅ Healthy Capacity</div></div>'}
+                    </div>
+                </div>`;
+            }
+
+            renderAdminDashboard() {
+                const user = this.personaToUser[this.currentPersona];
+                const integrations = this.workItems[user].admin || [];
+                const active = integrations.filter(i => i.status !== 'disabled').length;
+                const issues = integrations.filter(i => i.status === 'degraded').length;
+
+                return `<div class="max-w-7xl mx-auto px-4 py-12">
+                    <div style="margin-bottom: 32px;">
+                        <h2 style="font-size: 24px; font-weight: bold; margin-bottom: 24px;">🎛️ Integration Management Dashboard</h2>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;">
+                            <div class="metric-card">
+                                <div class="metric-label">Active Integrations</div>
+                                <div class="metric-value">${active}</div>
+                                <div style="font-size: 14px; color: #10b981; margin-top: 8px;">of ${integrations.length} total</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">System Health</div>
+                                <div style="font-size: 32px; font-weight: bold; color: ${issues > 0 ? '#f59e0b' : '#10b981'}; margin: 10px 0;">
+                                    ${issues > 0 ? issues + ' Issues' : 'All Healthy'}
+                                </div>
+                                <div style="font-size: 14px; color: #6b7280; margin-top: 8px;">${issues} degraded</div>
+                            </div>
+                            <div class="metric-card">
+                                <div class="metric-label">Total Users Served</div>
+                                <div class="metric-value">${integrations.reduce((sum, i) => sum + i.users, 0)}</div>
+                                <div style="font-size: 14px; color: #6b7280; margin-top: 8px;">across all integrations</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    ${this.currentPersona.includes('security-lead') ? `
+                    <div style="background: #fffbeb; border-left: 4px solid #f59e0b; padding: 16px; border-radius: 8px; margin-bottom: 32px;">
+                        <div style="font-weight: 600; color: #b45309;">⏳ Pending Approvals: 2</div>
+                        <p style="color: #92400e; font-size: 14px; margin: 8px 0 0 0;">Rally Integration (missing SOC2) • LMS v2 (ready for approval)</p>
+                    </div>
+                    ` : ''}
+
+                    <div style="margin-bottom: 32px;">
+                        <h3 style="font-size: 18px; font-weight: bold; margin-bottom: 16px;">Integration Inventory</h3>
+                        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px;">
+                            ${integrations.map(int => `
+                                <div style="background: white; border-radius: 8px; padding: 16px; border: 2px solid ${int.status === 'healthy' ? '#10b981' : int.status === 'degraded' ? '#f59e0b' : '#d1d5db'}; text-align: center;">
+                                    <div style="font-weight: 600; font-size: 16px; margin-bottom: 4px;">${int.name}</div>
+                                    <div style="font-size: 12px; color: #6b7280; margin-bottom: 12px;">${int.type}</div>
+                                    <div style="font-size: 11px; font-weight: bold; color: ${int.status === 'healthy' ? '#10b981' : '#f59e0b'};>${int.uptime}</div>
+                                    <div style="font-size: 11px; color: #6b7280;">${int.users} users</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>`;
+            }
+
+            renderIntegrations() {
+                const user = this.personaToUser[this.currentPersona];
+                const integrations = this.workItems[user].admin || [];
+
+                return `<div class="max-w-7xl mx-auto px-4 py-12">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+                        <h2 style="font-size: 24px; font-weight: bold;">Integrations</h2>
+                        <button style="background: #3b82f6; color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">+ Add New</button>
+                    </div>
+                    <div style="space-y: 3;">
+                        ${integrations.map(int => `
+                            <div style="background: white; border-radius: 8px; padding: 20px; margin-bottom: 16px; border-left: 4px solid ${int.status === 'healthy' ? '#10b981' : '#f59e0b'};">
+                                <div style="display: flex; justify-content: space-between; align-items: start;">
+                                    <div style="flex: 1;">
+                                        <h3 style="font-size: 18px; font-weight: 600; margin: 0 0 4px 0;">${int.name}</h3>
+                                        <p style="color: #6b7280; font-size: 14px; margin: 0 0 12px 0;">${int.type}</p>
+                                        <div style="display: flex; gap: 24px; font-size: 14px; color: #6b7280;">
+                                            <div><strong>${int.users}</strong> users</div>
+                                            <div><strong>${int.uptime}</strong> uptime</div>
+                                            <div>Last sync: <strong>${int.lastSync}</strong></div>
+                                            <div>Sync freq: <strong>${int.syncFreq}</strong></div>
+                                        </div>
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <div style="font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 4px; background: ${int.status === 'healthy' ? '#dcfce7' : '#fef3c7'}; color: ${int.status === 'healthy' ? '#166534' : '#b45309'};">
+                                            ${int.status === 'healthy' ? '✓ Healthy' : '⚠ Degraded'}
+                                        </div>
+                                        <div style="margin-top: 8px;">
+                                            <button style="background: none; border: 1px solid #d1d5db; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-right: 8px; font-size: 12px;">Configure</button>
+                                            <button style="background: none; border: 1px solid #d1d5db; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">View Logs</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>`;
+            }
+
+            renderHealth() {
+                const user = this.personaToUser[this.currentPersona];
+                const integrations = this.workItems[user].admin || [];
+
+                return `<div class="max-w-7xl mx-auto px-4 py-12">
+                    <h2 style="font-size: 24px; font-weight: bold; margin-bottom: 24px;">Integration Health Monitor</h2>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px;">
+                        <div style="background: white; border-radius: 8px; padding: 20px;">
+                            <h3 style="font-weight: 600; margin-bottom: 16px;">Uptime Trend (Last 7 Days)</h3>
+                            <div style="background: linear-gradient(90deg, #10b981 0%, #10b981 98%, #f59e0b 100%); height: 4px; border-radius: 2px;"></div>
+                            <div style="margin-top: 12px; font-size: 12px; color: #6b7280;">Overall: 99.7% uptime</div>
+                        </div>
+                        <div style="background: white; border-radius: 8px; padding: 20px;">
+                            <h3 style="font-weight: 600; margin-bottom: 16px;">Average Sync Latency</h3>
+                            <div style="font-size: 28px; font-weight: bold; color: #10b981;">2.3s</div>
+                            <div style="margin-top: 12px; font-size: 12px; color: #6b7280;">P95: 3.8s | P99: 4.2s</div>
+                        </div>
+                    </div>
+                    <div style="background: white; border-radius: 8px; padding: 20px; margin-top: 24px;">
+                        <h3 style="font-weight: 600; margin-bottom: 16px;">Integration Comparison</h3>
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr style="border-bottom: 1px solid #e5e7eb;">
+                                <th style="text-align: left; padding: 12px; font-weight: 600;">Integration</th>
+                                <th style="padding: 12px; font-weight: 600;">Uptime</th>
+                                <th style="padding: 12px; font-weight: 600;">P95 Latency</th>
+                                <th style="padding: 12px; font-weight: 600;">Success Rate</th>
+                                <th style="padding: 12px; font-weight: 600;">Last Issue</th>
+                            </tr>
+                            ${this.workItems[this.personaToUser[this.currentPersona]].admin.map(int => `
+                                <tr style="border-bottom: 1px solid #f3f4f6;">
+                                    <td style="padding: 12px; font-weight: 500;">${int.name}</td>
+                                    <td style="padding: 12px;">${int.uptime}</td>
+                                    <td style="padding: 12px;">${int.status === 'healthy' ? '1.5s' : '5.3s'}</td>
+                                    <td style="padding: 12px;">${int.status === 'healthy' ? '100%' : '87.4%'}</td>
+                                    <td style="padding: 12px; color: #6b7280; font-size: 12px;">${int.issues === 0 ? 'None' : '2h ago'}</td>
+                                </tr>
+                            `).join('')}
+                        </table>
+                    </div>
+                </div>`;
+            }
+
+            renderApprovals() {
+                const user = this.personaToUser[this.currentPersona];
+                const approvals = this.workItems[user].approvals || [];
+
+                return `<div class="max-w-7xl mx-auto px-4 py-12">
+                    <h2 style="font-size: 24px; font-weight: bold; margin-bottom: 24px;">Pending Integrations Approval</h2>
+                    ${approvals.map(approval => `
+                        <div style="background: white; border-radius: 8px; padding: 20px; margin-bottom: 16px; border-left: 4px solid ${approval.status === 'ready' ? '#10b981' : '#f59e0b'};">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 16px;">
+                                <div>
+                                    <h3 style="font-size: 18px; font-weight: 600; margin: 0 0 4px 0;">${approval.name}</h3>
+                                    <p style="color: #6b7280; font-size: 14px; margin: 0;">Requested by ${approval.requestedBy} · ${approval.requestedAt}</p>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-size: 12px; font-weight: 600; padding: 4px 12px; border-radius: 4px; background: ${approval.status === 'ready' ? '#dcfce7' : '#fef3c7'}; color: ${approval.status === 'ready' ? '#166534' : '#b45309'};">
+                                        ${approval.status === 'ready' ? '✓ Ready for Approval' : '⏳ Review Required'}
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="background: #f9fafb; padding: 12px; border-radius: 6px; margin-bottom: 16px;">
+                                <p style="margin: 0; color: #6b7280; font-size: 14px;"><strong>Type:</strong> ${approval.type}</p>
+                                <p style="margin: 8px 0 0 0; color: #6b7280; font-size: 14px;"><strong>Compliance Score:</strong> ${approval.complianceScore}/5</p>
+                                ${approval.issues.length > 0 ? `<p style="margin: 8px 0 0 0; color: #ef4444; font-size: 14px;">⚠️ <strong>Issues:</strong> ${approval.issues.join(', ')}</p>` : '<p style="margin: 8px 0 0 0; color: #10b981; font-size: 14px;">✓ All compliance requirements met</p>'}
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <button style="background: #10b981; color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px;">Approve</button>
+                                <button style="background: none; border: 1px solid #d1d5db; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px;">Request Changes</button>
+                                <button style="background: #ef4444; color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 14px;">Deny</button>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>`;
+            }
+
+            renderAuditLogs() {
+                return `<div class="max-w-7xl mx-auto px-4 py-12">
+                    <h2 style="font-size: 24px; font-weight: bold; margin-bottom: 24px;">Audit Logs</h2>
+                    <div style="background: white; border-radius: 8px; overflow: hidden;">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <tr style="background: #f9fafb; border-bottom: 1px solid #e5e7eb;">
+                                <th style="text-align: left; padding: 12px; font-weight: 600;">Date/Time</th>
+                                <th style="padding: 12px; font-weight: 600;">User</th>
+                                <th style="padding: 12px; font-weight: 600;">Action</th>
+                                <th style="padding: 12px; font-weight: 600;">Details</th>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #e5e7eb;">
+                                <td style="padding: 12px;">Sep 28 14:30 UTC</td>
+                                <td style="padding: 12px;">Devon</td>
+                                <td style="padding: 12px;"><span style="background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 4px; font-size: 12px;">Deployed</span></td>
+                                <td style="padding: 12px; font-size: 12px; color: #6b7280;">Jira deployed to 100% users</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #e5e7eb;">
+                                <td style="padding: 12px;">Sep 28 14:15 UTC</td>
+                                <td style="padding: 12px;">Rachel</td>
+                                <td style="padding: 12px;"><span style="background: #dcfce7; color: #166534; padding: 2px 8px; border-radius: 4px; font-size: 12px;">Approved</span></td>
+                                <td style="padding: 12px; font-size: 12px; color: #6b7280;">Jira integration approved</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #e5e7eb;">
+                                <td style="padding: 12px;">Sep 28 14:00 UTC</td>
+                                <td style="padding: 12px;">Devon</td>
+                                <td style="padding: 12px;"><span style="background: #fef3c7; color: #b45309; padding: 2px 8px; border-radius: 4px; font-size: 12px;">Tested</span></td>
+                                <td style="padding: 12px; font-size: 12px; color: #6b7280;">Jira sync test successful: 200 items</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 12px;">Sep 28 13:45 UTC</td>
+                                <td style="padding: 12px;">Devon</td>
+                                <td style="padding: 12px;"><span style="background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 4px; font-size: 12px;">Configured</span></td>
+                                <td style="padding: 12px; font-size: 12px; color: #6b7280;">Changed sync frequency to 30m</td>
+                            </tr>
+                        </table>
                     </div>
                 </div>`;
             }
