@@ -360,7 +360,9 @@
                 let content = '';
                 const isAdmin = this.currentPersona.includes('-admin') || this.currentPersona.includes('security-lead');
 
-                if (isAdmin) {
+                if (this.currentTab === 'matrix') {
+                    content = this.renderMatrix();
+                } else if (isAdmin) {
                     if (this.currentTab === 'dashboard') {
                         content = this.renderAdminDashboard();
                     } else if (this.currentTab === 'integrations') {
@@ -452,6 +454,7 @@
                             <button class="tab-button ${this.currentTab === 'health' ? 'active' : ''}" data-tab="health">❤️ Health Monitor</button>
                             ${this.currentPersona.includes('security-lead') ? `<button class="tab-button ${this.currentTab === 'approvals' ? 'active' : ''}" data-tab="approvals">✅ Approvals</button>` : ''}
                             ${this.currentPersona.includes('security-lead') ? `<button class="tab-button ${this.currentTab === 'audit' ? 'active' : ''}" data-tab="audit">📋 Audit Logs</button>` : ''}
+                            <button class="tab-button ${this.currentTab === 'matrix' ? 'active' : ''}" data-tab="matrix">👥 Personas & Roles</button>
                         </div>
                     </div>`;
                 } else {
@@ -461,6 +464,7 @@
                             <button class="tab-button ${this.currentTab === 'queue' ? 'active' : ''}" data-tab="queue">📋 My Queue</button>
                             <button class="tab-button ${this.currentTab === 'sources' ? 'active' : ''}" data-tab="sources">🔄 Sources</button>
                             <button class="tab-button ${this.currentTab === 'capacity' ? 'active' : ''}" data-tab="capacity">📈 My Capacity</button>
+                            <button class="tab-button ${this.currentTab === 'matrix' ? 'active' : ''}" data-tab="matrix">👥 Personas & Roles</button>
                         </div>
                     </div>`;
                 }
@@ -1260,6 +1264,107 @@
                                 <td style="padding: 12px; font-size: 12px; color: #6b7280;">Changed sync frequency to 30m</td>
                             </tr>
                         </table>
+                    </div>
+                </div>`;
+            }
+
+            renderMatrix() {
+                return `<div class="max-w-7xl mx-auto px-4 py-12">
+                    <h2 style="font-size: 28px; font-weight: bold; margin-bottom: 8px;">👥 Prism Personas & Responsibilities</h2>
+                    <p style="color: #6b7280; margin-bottom: 24px; font-size: 16px;">Complete responsibility breakdown across all 7 Prism personas</p>
+
+                    <div style="background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
+                                    <th style="text-align: left; padding: 16px; font-weight: 600; font-size: 14px;">Persona</th>
+                                    <th style="text-align: left; padding: 16px; font-weight: 600; font-size: 14px;">Role</th>
+                                    <th style="text-align: left; padding: 16px; font-weight: 600; font-size: 14px;">Primary Focus</th>
+                                    <th style="text-align: left; padding: 16px; font-weight: 600; font-size: 14px;">Key Responsibilities</th>
+                                    <th style="text-align: left; padding: 16px; font-weight: 600; font-size: 14px;">Dashboards</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr style="border-bottom: 1px solid #e5e7eb; background: #f9fafb;">
+                                    <td style="padding: 16px; font-weight: 600;">👤 Sarah Chen</td>
+                                    <td style="padding: 16px;">Individual Contributor</td>
+                                    <td style="padding: 16px; color: #6b7280;">Personal work prioritization</td>
+                                    <td style="padding: 16px; font-size: 13px; color: #4b5563;">View personal queue • Track capacity • Hit commitments</td>
+                                    <td style="padding: 16px; font-size: 12px;">Dashboard, Queue, Sources, Capacity</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #e5e7eb;">
+                                    <td style="padding: 16px; font-weight: 600;">👥 Alex Torres</td>
+                                    <td style="padding: 16px;">Engineering Manager</td>
+                                    <td style="padding: 16px; color: #6b7280;">Team capacity & alignment</td>
+                                    <td style="padding: 16px; font-size: 13px; color: #4b5563;">Monitor team workload • Set priorities • Redistribute work • Prevent burnout</td>
+                                    <td style="padding: 16px; font-size: 12px;">Dashboard (Team), Queue, Capacity, Backlog</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #e5e7eb; background: #f9fafb;">
+                                    <td style="padding: 16px; font-weight: 600;">🎯 Jennifer Lee</td>
+                                    <td style="padding: 16px;">VP Engineering</td>
+                                    <td style="padding: 16px; color: #6b7280;">Org strategy execution</td>
+                                    <td style="padding: 16px; font-size: 13px; color: #4b5563;">Cascade org priorities • Monitor strategy alignment • Make capacity decisions</td>
+                                    <td style="padding: 16px; font-size: 12px;">Dashboard (Org), Executive View</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #e5e7eb;">
+                                    <td style="padding: 16px; font-weight: 600;">📋 Marcus</td>
+                                    <td style="padding: 16px;">HR Business Partner</td>
+                                    <td style="padding: 16px; color: #6b7280;">Compliance & people activities</td>
+                                    <td style="padding: 16px; font-size: 13px; color: #4b5563;">Surface HR priorities • Track completion • Coordinate across teams</td>
+                                    <td style="padding: 16px; font-size: 12px;">HR Tasks, Completion Status</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #e5e7eb; background: #f9fafb;">
+                                    <td style="padding: 16px; font-weight: 600;">📊 Lisa</td>
+                                    <td style="padding: 16px;">Product Manager</td>
+                                    <td style="padding: 16px; color: #6b7280;">Cross-functional balance</td>
+                                    <td style="padding: 16px; font-size: 13px; color: #4b5563;">Prioritize ad-hoc work • Protect deep work • Manage expectations</td>
+                                    <td style="padding: 16px; font-size: 12px;">Dashboard, Queue, Capacity</td>
+                                </tr>
+                                <tr style="border-bottom: 1px solid #e5e7eb;">
+                                    <td style="padding: 16px; font-weight: 600;">⚙️ Devon</td>
+                                    <td style="padding: 16px;">Integration Administrator</td>
+                                    <td style="padding: 16px; color: #6b7280;">Integration lifecycle management</td>
+                                    <td style="padding: 16px; font-size: 13px; color: #4b5563;">Configure integrations • Deploy safely • Monitor health • Troubleshoot</td>
+                                    <td style="padding: 16px; font-size: 12px;">Dashboard, Integrations, Health, Logs</td>
+                                </tr>
+                                <tr style="background: #f9fafb;">
+                                    <td style="padding: 16px; font-weight: 600;">🔒 Rachel</td>
+                                    <td style="padding: 16px;">Security/Compliance Lead</td>
+                                    <td style="padding: 16px; color: #6b7280;">Governance & compliance</td>
+                                    <td style="padding: 16px; font-size: 13px; color: #4b5563;">Approve integrations • Enforce compliance • Audit logging • Risk management</td>
+                                    <td style="padding: 16px; font-size: 12px;">Dashboard, Integrations, Approvals, Logs</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div style="margin-top: 40px;">
+                        <h3 style="font-size: 20px; font-weight: 600; margin-bottom: 16px;">📌 Responsibility Distribution</h3>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px;">
+                            <div style="background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #667eea;">
+                                <h4 style="margin: 0 0 12px 0; font-weight: 600; color: #667eea;">Work Execution</h4>
+                                <p style="margin: 0; font-size: 13px; color: #4b5563; line-height: 1.6;">Sarah, Lisa, Alex R. manage personal queues; Alex T. leads team coordination</p>
+                            </div>
+                            <div style="background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #764ba2;">
+                                <h4 style="margin: 0 0 12px 0; font-weight: 600; color: #764ba2;">Organizational Alignment</h4>
+                                <p style="margin: 0; font-size: 13px; color: #4b5563; line-height: 1.6;">Jennifer cascades strategy; Marcus handles HR/compliance activities; Dev teams execute</p>
+                            </div>
+                            <div style="background: white; padding: 20px; border-radius: 8px; border-left: 4px solid #10b981;">
+                                <h4 style="margin: 0 0 12px 0; font-weight: 600; color: #10b981;">Integration & Governance</h4>
+                                <p style="margin: 0; font-size: 13px; color: #4b5563; line-height: 1.6;">Devon operates integrations; Rachel governs compliance & security; clear separation of duties</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 40px; background: #f0f9ff; border-left: 4px solid #3b82f6; padding: 20px; border-radius: 8px;">
+                        <h3 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: #1e40af;">🔑 Key Insights</h3>
+                        <ul style="margin: 0; padding-left: 20px; color: #1e40af; font-size: 13px; line-height: 1.8;">
+                            <li>No single super-user: each persona has distinct, complementary responsibilities</li>
+                            <li>Admin separation: Devon (operations) and Rachel (governance) with clear handoff points</li>
+                            <li>Clear hierarchy: IC → Manager → Executive → Org with no cross-cutting authority</li>
+                            <li>Privacy by design: only managers see team details; only Rachel sees full audit trail</li>
+                            <li>All ICs can delegate to peers with permission; managers can override priorities with explanation</li>
+                        </ul>
                     </div>
                 </div>`;
             }
